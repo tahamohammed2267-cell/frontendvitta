@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Building2, HeartPulse, Sun, Wind } from "lucide-react";
-import { aggregateKPIs, industries, portfolioProjects, projectsForIndustry, projectsRequiringAttention } from "../../lib/portfolioData";
+import { ArrowUpRight, Building2, HeartPulse, MapPin, Sun, Wind } from "lucide-react";
+import {
+  aggregateKPIs, countryGroups, industries, portfolioProjects, projectsForCountry, projectsForIndustry, projectsRequiringAttention,
+} from "../../lib/portfolioData";
 import { Badge, Card, CardHeader, Stat } from "../../lib/ui";
 import InsightsPanel from "./insights/InsightsPanel";
+import ComparisonsSection from "./comparisons/ComparisonsSection";
 
 const industryIcon = { solar: Sun, wind: Wind, infrastructure: Building2 };
 
@@ -58,6 +61,32 @@ export default function PortfolioHome() {
             })}
           </div>
 
+          <p className="pt-2 text-[15px] font-semibold tracking-tight">Regions</p>
+          <div className="grid grid-cols-3 gap-4">
+            {countryGroups().map((g) => {
+              const projects = projectsForCountry(g.name);
+              const s = aggregateKPIs(projects);
+              return (
+                <Link key={g.name} to={`/portfolio/country/${encodeURIComponent(g.name)}`}>
+                  <Card className="h-full transition-shadow hover:shadow-[0_4px_16px_rgba(11,14,20,0.07)]">
+                    <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-ink-100 text-ink-600"><MapPin size={17} strokeWidth={1.8} /></div>
+                    <p className="text-[14px] font-semibold">{g.name}</p>
+                    <p className="mt-0.5 text-[11.5px] text-ink-500">{g.industryKeys.length} industries · {projects.length} projects</p>
+                    <div className="mt-3 space-y-1.5 text-[12px]">
+                      <div className="flex justify-between"><span className="text-ink-500">Revenue</span><span className="num font-semibold">€{s.totalRevenueM}M</span></div>
+                      <div className="flex justify-between"><span className="text-ink-500">EBITDA</span><span className="num font-semibold">€{s.totalEbitdaM}M</span></div>
+                      <div className="flex justify-between"><span className="text-ink-500">Asset health</span><span className="num font-semibold">{s.avgAssetHealth}</span></div>
+                    </div>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="space-y-4 fade-up">
+          <InsightsPanel limit={4} />
+
           <Card pad={false}>
             <div className="border-b border-ink-100 px-5 py-4"><CardHeader title="Projects requiring attention" sub="Top of the Health Center triage list" /></div>
             <div className="divide-y divide-ink-100">
@@ -77,10 +106,10 @@ export default function PortfolioHome() {
             </div>
           </Card>
         </div>
+      </div>
 
-        <div className="space-y-4 fade-up">
-          <InsightsPanel limit={4} />
-        </div>
+      <div className="mt-4 fade-up">
+        <ComparisonsSection />
       </div>
     </div>
   );

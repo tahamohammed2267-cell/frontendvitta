@@ -1,7 +1,8 @@
 import {
   aggregateKPIs, findProject, findRegion, portfolioProjects, projectsForIndustry, projectsForRegion,
-  type ComparisonKey, type DashboardScope, type MetricKey, type TimeRange,
+  type ComparisonKey, type DashboardScope, type IndustryKey, type MetricKey, type PortfolioProject, type TimeRange,
 } from "../../../lib/portfolioData";
+import type { ComparableEntity } from "../comparisons/comparisonEntities";
 
 export interface SeriesPoint { label: string; value: number }
 
@@ -30,6 +31,8 @@ function metricValueFor(metric: MetricKey, projects: ReturnType<typeof scopedPro
     case "debtService": return Math.round(projects.reduce((a, p) => a + p.financials.costs.debtServiceM, 0) * 10) / 10;
     case "panelEfficiency": return projects.length ? Math.round((projects.reduce((a, p) => a + (p.drivers.metrics.find((m) => m.label.includes("Efficiency"))?.value ?? 0), 0) / projects.length) * 10) / 10 : 0;
     case "availability": return projects.length ? Math.round((projects.reduce((a, p) => a + (p.drivers.metrics.find((m) => m.label.includes("Availability"))?.value ?? 0), 0) / projects.length) * 10) / 10 : 0;
+    case "debtOutstanding": return Math.round(projects.reduce((a, p) => a + p.kpis.debtOutstandingM, 0) * 10) / 10;
+    case "openIssues": return projects.reduce((a, p) => a + p.assetHealth.openIssues, 0);
     default: return 0;
   }
 }
@@ -39,12 +42,30 @@ export const metricLabels: Record<MetricKey, string> = {
   netIncome: "Net Income", generation: "Generation", capacityUtilization: "Capacity Utilization",
   assetHealth: "Asset Health", cashFlow: "Cash Flow", maintenanceCost: "Maintenance Cost",
   opex: "OPEX", capex: "CAPEX", debtService: "Debt Service", panelEfficiency: "Panel Efficiency", availability: "Availability",
+  debtOutstanding: "Debt Outstanding", openIssues: "Open Issues",
 };
 
 export const metricUnits: Record<MetricKey, string> = {
   revenue: "€M", revenueGrowth: "%", ebitda: "€M", ebitdaMargin: "%", netIncome: "€M", generation: "GWh",
   capacityUtilization: "%", assetHealth: "", cashFlow: "€M", maintenanceCost: "€M", opex: "€M", capex: "€M",
   debtService: "€M", panelEfficiency: "%", availability: "%",
+  debtOutstanding: "€M", openIssues: "",
+};
+
+export type MetricCategory = "businessDrivers" | "topline" | "earnings" | "costBreakdown" | "operationalKPIs" | "financialKPIs" | "custom";
+
+export const metricCategoryLabels: Record<MetricCategory, string> = {
+  businessDrivers: "Business Drivers", topline: "Topline", earnings: "Earnings", costBreakdown: "Cost Breakdown",
+  operationalKPIs: "Operational KPIs", financialKPIs: "Financial KPIs", custom: "Custom Metrics",
+};
+
+export const metricCategories: Record<MetricKey, MetricCategory> = {
+  revenue: "topline", revenueGrowth: "topline",
+  ebitda: "earnings", ebitdaMargin: "earnings", netIncome: "earnings",
+  generation: "operationalKPIs", capacityUtilization: "operationalKPIs", panelEfficiency: "operationalKPIs", availability: "operationalKPIs",
+  assetHealth: "financialKPIs", cashFlow: "financialKPIs", debtService: "financialKPIs",
+  maintenanceCost: "costBreakdown", opex: "costBreakdown", capex: "costBreakdown",
+  debtOutstanding: "custom", openIssues: "custom",
 };
 
 const comparisonFactor: Record<ComparisonKey, number> = {
@@ -90,4 +111,53 @@ export function getTableRows(scope: DashboardScope, scopeId: string) {
 export function getHeatmapData(scope: DashboardScope, scopeId: string) {
   const projects = scopedProjects(scope, scopeId);
   return projects.map((p) => ({ row: p.name, col: "Asset Health", value: p.assetHealth.score }));
+}
+
+// ── Comparison entity resolution ────────────────────────────
+// Parallel to scopedProjects/DashboardScope above, but for the comparisons
+// feature: a ComparableEntity can be a single project, a region, an
+// industry (total or per-project average), or the whole portfolio —
+// shapes DashboardScope can't express (no "average" variant, no
+// multi-entity combination). Delegates to the same metricValueFor
+// switch so every MetricKey computation stays defined in one place.
+
+const perProjectAdditiveMetrics: MetricKey[] = [
+  "revenue", "ebitda", "netIncome", "generation", "cashFlow", "maintenanceCost", "opex", "capex", "debtService", "debtOutstanding",
+];
+
+export function resolveEntityProjects(entity: ComparableEntity): PortfolioProject[] {
+  switch (entity.kind) {
+    case "project": { const p = findProject(entity.refId); return p ? [p] : []; }
+    case "region": return projectsForRegion(entity.refId);
+    case "industry": return projectsForIndustry(entity.refId as IndustryKey);
+    case "industryAverage": return projectsForIndustry(entity.refId as IndustryKey);
+    case "globalPortfolio": return portfolioProjects;
+  }
+}
+
+export function getComparisonEntityMetricValue(metric: MetricKey, entity: ComparableEntity): number {
+  const projects = resolveEntityProjects(entity);
+  const raw = metricValueFor(metric, projects);
+  if (entity.kind === "industryAverage" && projects.length > 0 && perProjectAdditiveMetrics.includes(metric)) {
+    return Math.round((raw / projects.length) * 10) / 10;
+  }
+  return raw;
+}
+
+export function getEntityMetricSeries(metric: MetricKey, entity: ComparableEntity, _timeRange: TimeRange): SeriesPoint[] {
+  const projects = resolveEntityProjects(entity);
+  if (projects.length === 0) return [];
+  if (entity.kind === "project") {
+    return projects[0].financials.topline.byMonth.map((m) => ({ label: m.month, value: metricKeyFromMonth(metric, m.revenueM, projects[0]) }));
+  }
+  // non-project entities: no per-entity monthly series exists in the data
+  // model — mock-approximate by zipping constituent projects' byMonth
+  // arrays index-for-index (all seed projects share the same 6 month labels).
+  const months = projects[0].financials.topline.byMonth.map((m) => m.month);
+  const divisor = entity.kind === "industryAverage" && perProjectAdditiveMetrics.includes(metric) ? projects.length : 1;
+  return months.map((month, i) => {
+    const total = projects.reduce((a, p) => a + (p.financials.topline.byMonth[i]?.revenueM ?? 0), 0);
+    const value = metric === "revenue" ? total : metricKeyFromMonth(metric, total, projects[0]);
+    return { label: month, value: Math.round((value / divisor) * 10) / 10 };
+  });
 }
