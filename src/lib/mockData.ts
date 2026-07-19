@@ -579,3 +579,90 @@ export const suggestedPrompts = [
 ];
 
 export const currentUser = { name: "Jane Moreau", initials: "JM", role: "Investment Principal" };
+
+// ── IC memo content (keyed by icMemoSections title) ─────────
+
+export const icMemoContent: Record<string, string> = {
+  "Executive Summary":
+    "Northbridge Capital Partners is asked to provide a €67.5M senior secured facility (70% gearing, 17-year door-to-door) to Project Helios, a 120 MWp solar PV asset in Andalusia, Spain. The project benefits from an executed 10-year PPA at €52.40/MWh with 1.8% annual escalation, a fixed-price EPC contract at €96.4M, and a strong resource profile (P50 1,812 kWh/kWp). Base-case levered equity IRR is 11.8% with a minimum DSCR of 1.30x.",
+  "Borrower Profile":
+    "The borrower is a single-purpose vehicle established for Project Helios, ultimately owned by the sponsor group behind SolarBond's EPC pipeline. The SPV has no other assets or liabilities and is capitalized solely for this transaction, ring-fencing the facility from sponsor-level risk.",
+  "Transaction Overview":
+    "Funding comprises €67.5M senior debt, €24.1M sponsor equity and €4.8M mezzanine. Security includes a first-ranking pledge over project shares, the land lease, and all project contracts. The facility prices at Euribor 6M + 265 bps with cash sweep above a 1.30x DSCR target; lock-up at 1.15x.",
+  "Project Description":
+    "Project Helios is a 120 MWp ground-mounted solar PV plant located on a 312-hectare site in Andalusia, connected to the 220 kV Seville East substation. Construction is EPC'd on a fixed-price, date-certain basis with a guaranteed completion date of 30 September 2027.",
+  "Market Analysis":
+    "Iberian PPA tariffs have trended down roughly 6% quarter-on-quarter across the firm's 14 comparable precedents, so Helios's pricing likely reflects a broader market shift rather than asset-specific weakness. Spanish solar remains the firm's deepest sector, with 17 deals evaluated to date.",
+  "Technical Assessment":
+    "The independent resource assessment estimates a P50 specific yield of 1,812 kWh/kWp, above the median for comparable Southern-European assets. Module degradation and inverter specifications are in line with the firm's underwriting standards for tier-1 equipment.",
+  "Contract Structure":
+    "The project sits on an executed, 10-year PPA with Iberdrola at €52.40/MWh, escalating 1.8% annually, governed by an EPC lump-sum contract with SolarBond. The O&M agreement remains in draft at the time of this memo.",
+  "Financial Summary":
+    "Total CAPEX is €96.4M per the executed EPC contract (a competing €98.1M figure in the financial model reflects a pre-signing draft and has been superseded). Computed outputs from the reconciled financial model show a Project IRR of 8.4% and levered Equity IRR of 11.8%.",
+  "Funding Structure":
+    "Senior debt of €67.5M (70% gearing) prices at Euribor 6M + 265 bps over a 17-year door-to-door tenor. Sponsor equity of €24.1M and mezzanine of €4.8M complete the capital stack, with security over project shares, contracts, and the land lease.",
+  "Repayment Structure":
+    "The facility amortizes on a sculpted basis targeting a minimum 1.30x DSCR, with a cash sweep above target and lock-up at 1.15x DSCR. Default is triggered below 1.05x, consistent with the firm's standard project-finance covenant package.",
+  "Risk Factors":
+    "The executed PPA tariff sits €1.60/MWh below the term-sheet sizing floor, compressing Year 3–5 coverage; mitigation via a sponsor revenue top-up is under discussion. The O&M agreement remains in draft, and grid curtailment (2.1% regionally in 2025) is unquantified in the yield case. Both are conditions precedent in the current term sheet draft.",
+  "ESG & Environmental":
+    "As a utility-scale solar asset, Helios displaces an estimated equivalent of fossil generation consistent with the firm's renewable financing mandate. The environmental impact study identifies no material biodiversity or land-use concerns beyond standard construction-phase mitigations.",
+  "Legal & Regulatory":
+    "The land lease runs 25 years with a 5-year extension option at the lessor's discretion — shorter than the debt tenor, a structuring point flagged for legal sign-off. Grid connection and environmental permits are in place; no outstanding regulatory contingencies have been identified.",
+  Insurance:
+    "Construction-phase insurance (all-risks, DSU) and operational property/business-interruption cover are required conditions precedent. Precedent transactions have shown draft insurance slips routinely miss business-interruption cover for curtailment — this should be confirmed explicitly before financial close.",
+  "Benchmarking & Precedents":
+    "Against 17 comparable Iberian solar precedents, Helios's CAPEX per MWp and O&M cost sit within range, while the PPA tariff sits below the P25 comparable. Draft O&M agreements at IC stage have added roughly 23 days to close in 6 of 9 comparable deals — a precedent worth flagging to the committee.",
+  Recommendation:
+    "Subject to execution of the O&M agreement and quantification of curtailment exposure prior to financial close, the deal team recommends proceeding to credit committee on the terms summarized above.",
+};
+
+// ── Memo Studio prompt templates ────────────────────────────
+
+export interface PromptTemplate {
+  id: string;
+  name: string;
+  outputKind: "word" | "pdf" | "deck" | "onepager" | "summary";
+  systemPrompt: string;
+  lastEditedBy: string;
+  lastEditedAt: string;
+}
+
+export const promptTemplates: PromptTemplate[] = [
+  {
+    id: "ic-memo",
+    name: "IC Memo — Northbridge house format",
+    outputKind: "word",
+    systemPrompt:
+      "You write for Northbridge Capital Partners' investment committee. Lead with downside DSCR, not the base case. Cite every figure to its source document and page. Sections: Executive Summary, Borrower Profile, Transaction Overview, Project Description, Market Analysis, Technical Assessment, Contract Structure, Financial Summary, Funding Structure, Repayment Structure, Risk Factors, ESG & Environmental, Legal & Regulatory, Insurance, Benchmarking & Precedents, Recommendation. British English. Calm, institutional tone — no exclamation marks. Max 6 pages.",
+    lastEditedBy: "Jane Moreau",
+    lastEditedAt: "Jul 15, 2026",
+  },
+  {
+    id: "ic-deck",
+    name: "IC Deck (PPTX)",
+    outputKind: "deck",
+    systemPrompt:
+      "Produce a 10-slide investment committee deck summarizing the deal for a live committee presentation. One idea per slide, minimal text, charts over tables where possible. Open with the ask, close with the recommendation. Match the firm's understated visual style — no gradients, no stock photography.",
+    lastEditedBy: "A. Lindqvist",
+    lastEditedAt: "Jul 10, 2026",
+  },
+  {
+    id: "cc-onepager",
+    name: "Credit committee one-pager",
+    outputKind: "onepager",
+    systemPrompt:
+      "Summarize the transaction on a single page for a credit committee member who has not read the full memo: deal size, gearing, tenor, pricing, DSCR, top 3 risks, and recommendation. No more than 200 words. Assume financial literacy but no deal-specific context.",
+    lastEditedBy: "Jane Moreau",
+    lastEditedAt: "Jun 28, 2026",
+  },
+  {
+    id: "term-sheet-summary",
+    name: "Term sheet summary",
+    outputKind: "summary",
+    systemPrompt:
+      "Extract and summarize every commercial term from the lender term sheet: facility size, pricing, tenor, covenants, conditions precedent, and security package. Present as a structured list a lawyer could check against the definitive documents. Flag anything that conflicts with the executed PPA or EPC contract.",
+    lastEditedBy: "R. Chen",
+    lastEditedAt: "Jul 2, 2026",
+  },
+];

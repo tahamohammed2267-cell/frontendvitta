@@ -87,15 +87,19 @@ export function StatusDot({ tone }: { tone: "green" | "orange" | "red" | "blue" 
 // ── Buttons ─────────────────────────────────────────────────
 
 export function Button({
-  children, variant = "primary", className, onClick,
-}: { children: ReactNode; variant?: "primary" | "secondary" | "ghost"; className?: string; onClick?: () => void }) {
+  children, variant = "primary", className, onClick, disabled,
+}: { children: ReactNode; variant?: "primary" | "secondary" | "ghost"; className?: string; onClick?: () => void; disabled?: boolean }) {
   const styles = {
     primary: "bg-accent-600 text-white hover:bg-accent-700",
     secondary: "border border-ink-200 bg-white text-ink-800 hover:bg-ink-50",
     ghost: "text-ink-600 hover:bg-ink-100",
   };
   return (
-    <button onClick={onClick} className={cn("inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-medium transition-colors", styles[variant], className)}>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={cn("inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-[13px] font-medium transition-colors disabled:pointer-events-none disabled:opacity-40", styles[variant], className)}
+    >
       {children}
     </button>
   );

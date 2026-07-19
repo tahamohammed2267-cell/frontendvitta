@@ -21,10 +21,18 @@ import type {
   DealDocument,
   GeneratedFile,
   Project,
+  PromptTemplate,
   RiskItem,
   ValidationFlag,
 } from "./mockData";
 import { getActiveTimeline, runTimeline } from "./timeline";
+import { pickReply, type ChatCitation } from "./chatResponses";
+
+export interface ChatMessage {
+  role: "user" | "ai";
+  text: string;
+  citations?: ChatCitation[];
+}
 
 export type HeliosStage = "pre-upload" | "uploading" | "running" | "done";
 
@@ -74,10 +82,12 @@ function staticSlices() {
     fundingWaterfall: structuredClone(fixtures.fundingWaterfall),
     knowledgeGrowth: structuredClone(fixtures.knowledgeGrowth),
     icMemoSections: structuredClone(fixtures.icMemoSections),
+    icMemoContent: structuredClone(fixtures.icMemoContent),
     icDeckSlides: structuredClone(fixtures.icDeckSlides),
-    chatSample: structuredClone(fixtures.chatSample),
+    chatSample: structuredClone(fixtures.chatSample) as ChatMessage[],
     suggestedPrompts: structuredClone(fixtures.suggestedPrompts),
     currentUser: structuredClone(fixtures.currentUser),
+    promptTemplates: structuredClone(fixtures.promptTemplates) as PromptTemplate[],
   };
 }
 
@@ -92,12 +102,22 @@ export interface SourceDrawerPayload {
   snippet?: string;
 }
 
+export interface MemoGeneration {
+  active: boolean;
+  templateId: string | null;
+  sectionIndex: number;
+  done: boolean;
+}
+
 interface Store extends Data {
   heliosStage: HeliosStage;
   pipelineStageIndex: number;
   pipelineCounters: { fields: number; tables: number };
   sourceDrawer: SourceDrawerPayload | null;
   toast: string | null;
+  blueprintPopulated: boolean;
+  computedWorkbook: { uploaded: boolean; ingesting: boolean };
+  memoGeneration: MemoGeneration;
   reset: () => void;
   startHeliosUpload: () => void;
   setDocumentProgress: (id: string, patch: Partial<DealDocument>) => void;
@@ -113,6 +133,15 @@ interface Store extends Data {
   openSourceDrawer: (payload: SourceDrawerPayload) => void;
   closeSourceDrawer: () => void;
   showToast: (message: string) => void;
+  updatePromptTemplate: (id: string, systemPrompt: string) => void;
+  populateBlueprint: () => void;
+  ingestComputedWorkbook: () => void;
+  startMemoGeneration: (templateId: string) => void;
+  closeMemoGeneration: () => void;
+  addGeneratedFile: (file: { baseName: string; ext: string; kind: GeneratedFile["kind"]; sizeMB: number }) => void;
+  chatThinking: boolean;
+  sendChatMessage: (text: string) => void;
+  clearChat: () => void;
 }
 
 let extractionTicker: ReturnType<typeof setInterval> | null = null;
@@ -137,6 +166,10 @@ export const useStore = create<Store>()(
       pipelineCounters: { fields: 0, tables: 0 },
       sourceDrawer: null,
       toast: null,
+      blueprintPopulated: false,
+      computedWorkbook: { uploaded: true, ingesting: false },
+      memoGeneration: { active: false, templateId: null, sectionIndex: -1, done: false },
+      chatThinking: false,
 
       reset: () => {
         clearExtractionTicker();
@@ -150,6 +183,10 @@ export const useStore = create<Store>()(
           pipelineCounters: { fields: 0, tables: 0 },
           sourceDrawer: null,
           toast: null,
+          blueprintPopulated: false,
+          computedWorkbook: { uploaded: true, ingesting: false },
+          memoGeneration: { active: false, templateId: null, sectionIndex: -1, done: false },
+          chatThinking: false,
         });
       },
 
@@ -309,6 +346,82 @@ export const useStore = create<Store>()(
           }
         );
       },
+
+      updatePromptTemplate: (id, systemPrompt) => {
+        set((s) => ({
+          promptTemplates: s.promptTemplates.map((t) =>
+            t.id === id ? { ...t, systemPrompt, lastEditedBy: get().currentUser.name, lastEditedAt: now() } : t
+          ),
+        }));
+        get().showToast("Prompt saved");
+      },
+
+      populateBlueprint: () => {
+        if (get().blueprintPopulated) return;
+        set({ blueprintPopulated: true });
+      },
+
+      ingestComputedWorkbook: () => {
+        if (get().computedWorkbook.ingesting) return;
+        set({ computedWorkbook: { uploaded: false, ingesting: true } });
+        setTimeout(() => {
+          set({ computedWorkbook: { uploaded: true, ingesting: false } });
+          get().showToast("Computed workbook ingested");
+        }, 6000);
+      },
+
+      startMemoGeneration: (templateId) => {
+        getActiveTimeline()?.cancel();
+        set({ memoGeneration: { active: true, templateId, sectionIndex: -1, done: false } });
+        const sections = get().icMemoSections;
+        runTimeline(
+          sections.map((_, i) => ({
+            durationMs: 1500,
+            onStart: () => set((s) => ({ memoGeneration: { ...s.memoGeneration, sectionIndex: i } })),
+          })),
+          () => {
+            set((s) => ({ memoGeneration: { ...s.memoGeneration, done: true } }));
+            get().showToast("Memo generated");
+          }
+        );
+      },
+
+      closeMemoGeneration: () => {
+        getActiveTimeline()?.cancel();
+        set({ memoGeneration: { active: false, templateId: null, sectionIndex: -1, done: false } });
+      },
+
+      addGeneratedFile: (file) => {
+        set((s) => {
+          const existingVersions = s.generatedFiles.filter((f) => f.name.replace(/_v\d+/, "") === `${file.baseName}.${file.ext}`).map((f) => f.version);
+          const version = existingVersions.length > 0 ? Math.max(...existingVersions) + 1 : 1;
+          const entry: GeneratedFile = {
+            id: `${file.baseName}-v${version}-${Date.now()}`,
+            name: `${file.baseName}_v${version}.${file.ext}`,
+            kind: file.kind,
+            sizeMB: file.sizeMB,
+            generatedAt: now(),
+            generatedBy: get().currentUser.name,
+            version,
+          };
+          return { generatedFiles: [entry, ...s.generatedFiles] };
+        });
+      },
+
+      sendChatMessage: (text) => {
+        const trimmed = text.trim();
+        if (!trimmed) return;
+        set((s) => ({ chatSample: [...s.chatSample, { role: "user", text: trimmed }], chatThinking: true }));
+        setTimeout(() => {
+          const reply = pickReply(trimmed);
+          set((s) => ({
+            chatSample: [...s.chatSample, { role: "ai", text: reply.text, citations: reply.citations }],
+            chatThinking: false,
+          }));
+        }, 800);
+      },
+
+      clearChat: () => set({ chatSample: [], chatThinking: false }),
     }),
     { name: "vitta-demo-state" }
   )
