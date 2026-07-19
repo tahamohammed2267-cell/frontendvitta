@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "./cn";
+import { useStore } from "./store";
 
 // ── Card ────────────────────────────────────────────────────
 
@@ -134,11 +135,28 @@ export function EmptyState({ icon, title, sub }: { icon: ReactNode; title: strin
 
 // ── Source citation chip ────────────────────────────────────
 
-export function SourceChip({ doc, page }: { doc: string; page: number }) {
+export function SourceChip({
+  doc, page, field, value, confidence, snippet,
+}: {
+  doc: string;
+  page: number;
+  field?: string;
+  value?: string;
+  confidence?: number;
+  snippet?: string;
+}) {
+  const openSourceDrawer = useStore((s) => s.openSourceDrawer);
   return (
-    <span className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-ink-200 bg-ink-50 px-2 py-0.5 text-[11px] text-ink-600">
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        openSourceDrawer({ doc, page, field, value, confidence, snippet });
+      }}
+      className="inline-flex max-w-full items-center gap-1.5 rounded-md border border-ink-200 bg-ink-50 px-2 py-0.5 text-[11px] text-ink-600 transition-colors hover:border-accent-500 hover:text-accent-700"
+    >
       <span className="truncate font-medium">{doc}</span>
       {page > 0 && <span className="num shrink-0 text-ink-400">p.{page}</span>}
-    </span>
+    </button>
   );
 }

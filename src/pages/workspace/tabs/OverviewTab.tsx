@@ -12,10 +12,16 @@ export default function OverviewTab() {
   const heliosStage = useStore((s) => s.heliosStage);
   const documents = useStore((s) => s.documents);
   const canonicalFields = useStore((s) => s.canonicalFields);
+  const conflicts = useStore((s) => s.conflicts);
   const revenueProjection = useStore((s) => s.revenueProjection);
   const risks = useStore((s) => s.risks);
   const actionItems = useStore((s) => s.actionItems);
   const inFlight = documents.filter((d) => d.status !== "done");
+  const doneDocs = documents.filter((d) => d.status === "done").length;
+  const confirmedFields = canonicalFields.filter((f) => f.status !== "ai-extracted" && f.status !== "missing").length;
+  const fieldPct = canonicalFields.length > 0 ? Math.round((confirmedFields / canonicalFields.length) * 100) : 0;
+  const openConflicts = conflicts.filter((c) => c.status === "open").length;
+  const resolvedConflicts = conflicts.filter((c) => c.status === "resolved").length;
 
   if (heliosStage !== "done") {
     return (
@@ -44,17 +50,17 @@ export default function OverviewTab() {
       <div className="grid grid-cols-4 gap-4">
         <Card><Stat label="Deal size" value="€96m" sub="70.0% debt · 30.0% equity" /></Card>
         <Card>
-          <Stat label="Fields confirmed" value="87 / 124" sub="70% of canonical model" />
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-100"><div className="h-full w-[70%] rounded-full bg-accent-600" /></div>
+          <Stat label="Fields confirmed" value={`${confirmedFields} / ${canonicalFields.length}`} sub={`${fieldPct}% of canonical model`} />
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-100"><div className="h-full rounded-full bg-accent-600" style={{ width: `${fieldPct}%` }} /></div>
         </Card>
         <Card>
           <Link to="?tab=reconciliation" className="block">
-            <Stat label="Open conflicts" value="4" sub="1 critical resolved" trend="down" />
+            <Stat label="Open conflicts" value={String(openConflicts)} sub={`${resolvedConflicts} resolved`} trend={openConflicts === 0 ? "flat" : "down"} />
           </Link>
         </Card>
         <Card>
           <Link to="?tab=documents" className="block">
-            <Stat label="Documents" value="14 / 19" sub="3 processing now" />
+            <Stat label="Documents" value={`${doneDocs} / ${documents.length}`} sub={`${documents.length - doneDocs} processing now`} />
           </Link>
         </Card>
       </div>
@@ -67,7 +73,13 @@ export default function OverviewTab() {
             <CardHeader
               title="Extraction pipeline"
               sub="Multi-pass AI extraction running asynchronously"
-              right={<Badge tone="blue"><Loader2 size={11} className="animate-spin" /> Live</Badge>}
+              right={
+                inFlight.length > 0 ? (
+                  <Badge tone="blue"><Loader2 size={11} className="animate-spin" /> Live</Badge>
+                ) : (
+                  <Badge tone="green"><CheckCircle2 size={11} /> Complete</Badge>
+                )
+              }
             />
             <div className="space-y-3">
               {inFlight.map((d) => (
@@ -86,7 +98,7 @@ export default function OverviewTab() {
                 </div>
               ))}
               <p className="flex items-center gap-1.5 text-[12px] text-ink-400">
-                <CheckCircle2 size={13} className="text-pos-600" /> 11 documents fully extracted — 253 fields, 12 tables, every value cited to page and snippet.
+                <CheckCircle2 size={13} className="text-pos-600" /> {doneDocs} documents fully extracted — {canonicalFields.length} fields, 12 tables, every value cited to page and snippet.
               </p>
             </div>
           </Card>

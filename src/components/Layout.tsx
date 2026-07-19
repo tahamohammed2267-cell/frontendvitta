@@ -8,6 +8,8 @@ import { cn } from "../lib/cn";
 import { useStore } from "../lib/store";
 import { getActiveTimeline } from "../lib/timeline";
 import ChatPanel from "../components/ChatPanel";
+import SourceDrawer from "../components/SourceDrawer";
+import Toast from "../components/Toast";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -151,6 +153,9 @@ export default function Layout() {
           <ChatPanel context={inProject ? "project" : "firm"} />
         </div>
       </div>
+
+      <SourceDrawer />
+      <Toast />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ChevronDown, Database, Download, Plus, Search } from "lucide-react";
 import type { CanonicalField } from "../../../lib/mockData";
 import { useStore } from "../../../lib/store";
+import { downloadCSV, downloadJSON } from "../../../lib/download";
 import { Badge, Button, Card, ConfidenceBar, EmptyState, SourceChip } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
@@ -63,8 +64,20 @@ export default function ExtractionTab() {
         <span className="text-ink-500"><span className="num font-semibold text-accent-700">{count("computed")}</span> computed in Excel</span>
         <span className="text-ink-500"><span className="num font-semibold text-crit-700">{count("missing")}</span> missing</span>
         <div className="ml-auto flex gap-2">
-          <Button variant="secondary"><Download size={13} /> CSV</Button>
-          <Button variant="secondary"><Download size={13} /> JSON</Button>
+          <Button
+            variant="secondary"
+            onClick={() =>
+              downloadCSV(
+                canonicalFields.map((f) => ({ field: f.field, category: f.category, value: f.value, confidence: f.confidence, status: f.status, source_doc: f.source.doc, source_page: f.source.page })),
+                "helios_canonical_fields.csv"
+              )
+            }
+          >
+            <Download size={13} /> CSV
+          </Button>
+          <Button variant="secondary" onClick={() => downloadJSON(canonicalFields, "helios_canonical_fields.json")}>
+            <Download size={13} /> JSON
+          </Button>
         </div>
       </div>
 
@@ -148,6 +161,15 @@ export default function ExtractionTab() {
 
 function FieldRow({ f, open, onToggle }: { f: CanonicalField; open: boolean; onToggle: () => void }) {
   const meta = statusMeta[f.status];
+  const confirmField = useStore((s) => s.confirmField);
+  const overrideField = useStore((s) => s.overrideField);
+  const addFieldManually = useStore((s) => s.addFieldManually);
+  const [overriding, setOverriding] = useState(false);
+  const [overrideValue, setOverrideValue] = useState("");
+  const [overrideReason, setOverrideReason] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [manualValue, setManualValue] = useState("");
+
   return (
     <>
       <tr onClick={onToggle} className="cursor-pointer transition-colors hover:bg-ink-50">
@@ -164,12 +186,18 @@ function FieldRow({ f, open, onToggle }: { f: CanonicalField; open: boolean; onT
         </td>
         <td className="px-4 py-3">{f.confidence > 0 ? <ConfidenceBar value={f.confidence} /> : <span className="text-[11px] text-ink-300">—</span>}</td>
         <td className="px-4 py-3"><Badge tone={meta.tone}>{meta.label}</Badge></td>
-        <td className="max-w-[220px] px-4 py-3">{f.source.doc !== "—" ? <SourceChip doc={f.source.doc} page={f.source.page} /> : <span className="text-[11px] text-ink-300">—</span>}</td>
+        <td className="max-w-[220px] px-4 py-3">
+          {f.source.doc !== "—" ? (
+            <SourceChip doc={f.source.doc} page={f.source.page} field={f.field} value={f.value} confidence={f.confidence} snippet={f.source.snippet} />
+          ) : (
+            <span className="text-[11px] text-ink-300">—</span>
+          )}
+        </td>
         <td className="pr-4"><ChevronDown size={14} className={cn("text-ink-400 transition-transform", open && "rotate-180")} /></td>
       </tr>
       {open && (
         <tr className="bg-ink-50/60">
-          <td colSpan={6} className="px-5 py-4">
+          <td colSpan={6} className="px-5 py-4" onClick={(e) => e.stopPropagation()}>
             {f.source.snippet && (
               <div className="mb-3 border-l-2 border-accent-600 pl-3">
                 <p className="text-[12.5px] italic leading-relaxed text-ink-700">“{f.source.snippet}”</p>
@@ -191,14 +219,70 @@ function FieldRow({ f, open, onToggle }: { f: CanonicalField; open: boolean; onT
                 Value computed in the uploaded workbook — highest-priority source; overrides anything the AI extracted.
               </p>
             )}
-            {f.status === "missing" ? (
-              <Button variant="ghost"><Plus size={13} /> Add manually</Button>
-            ) : f.status === "ai-extracted" ? (
-              <div className="flex gap-2">
-                <Button variant="secondary">Confirm value</Button>
-                <Button variant="ghost">Override…</Button>
+            {f.status === "missing" && !adding && (
+              <Button variant="ghost" onClick={() => setAdding(true)}><Plus size={13} /> Add manually</Button>
+            )}
+            {f.status === "missing" && adding && (
+              <div className="max-w-sm space-y-2">
+                <input
+                  autoFocus
+                  value={manualValue}
+                  onChange={(e) => setManualValue(e.target.value)}
+                  placeholder="Value"
+                  className="w-full rounded-lg border border-ink-200 bg-white px-2.5 py-1.5 text-[12.5px] outline-none focus:border-accent-500"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    className={cn(!manualValue.trim() && "pointer-events-none opacity-40")}
+                    onClick={() => {
+                      addFieldManually(f.id, manualValue.trim());
+                      setAdding(false);
+                      setManualValue("");
+                    }}
+                  >
+                    Save
+                  </Button>
+                  <Button variant="ghost" onClick={() => setAdding(false)}>Cancel</Button>
+                </div>
               </div>
-            ) : null}
+            )}
+            {f.status === "ai-extracted" && !overriding && (
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={() => confirmField(f.id)}>Confirm value</Button>
+                <Button variant="ghost" onClick={() => { setOverriding(true); setOverrideValue(f.value); }}>Override…</Button>
+              </div>
+            )}
+            {f.status === "ai-extracted" && overriding && (
+              <div className="max-w-sm space-y-2">
+                <input
+                  autoFocus
+                  value={overrideValue}
+                  onChange={(e) => setOverrideValue(e.target.value)}
+                  placeholder="Value"
+                  className="w-full rounded-lg border border-ink-200 bg-white px-2.5 py-1.5 text-[12.5px] outline-none focus:border-accent-500"
+                />
+                <textarea
+                  value={overrideReason}
+                  onChange={(e) => setOverrideReason(e.target.value)}
+                  placeholder="Reason (required)"
+                  rows={2}
+                  className="w-full rounded-lg border border-ink-200 bg-white px-2.5 py-1.5 text-[12.5px] outline-none focus:border-accent-500"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    className={cn((!overrideValue.trim() || !overrideReason.trim()) && "pointer-events-none opacity-40")}
+                    onClick={() => {
+                      overrideField(f.id, overrideValue.trim(), overrideReason.trim());
+                      setOverriding(false);
+                      setOverrideReason("");
+                    }}
+                  >
+                    Save override
+                  </Button>
+                  <Button variant="ghost" onClick={() => setOverriding(false)}>Cancel</Button>
+                </div>
+              </div>
+            )}
           </td>
         </tr>
       )}

@@ -83,20 +83,48 @@ function staticSlices() {
 
 type Data = ReturnType<typeof staticSlices> & ReturnType<typeof heliosEmpty>;
 
+export interface SourceDrawerPayload {
+  doc: string;
+  page: number;
+  field?: string;
+  value?: string;
+  confidence?: number;
+  snippet?: string;
+}
+
 interface Store extends Data {
   heliosStage: HeliosStage;
   pipelineStageIndex: number;
   pipelineCounters: { fields: number; tables: number };
+  sourceDrawer: SourceDrawerPayload | null;
+  toast: string | null;
   reset: () => void;
   startHeliosUpload: () => void;
   setDocumentProgress: (id: string, patch: Partial<DealDocument>) => void;
   startHeliosPipeline: () => void;
+  confirmField: (id: string) => void;
+  overrideField: (id: string, value: string, reason: string) => void;
+  addFieldManually: (id: string, value: string) => void;
+  resolveConflict: (id: string, chosen: { value: string; source: string; page?: number; snippet?: string; confidence?: number }, note: string) => void;
+  reopenConflict: (id: string) => void;
+  escalateConflict: (id: string) => void;
+  dismissValidationFlag: (id: string) => void;
+  createActionItemFromFlag: (id: string) => void;
+  openSourceDrawer: (payload: SourceDrawerPayload) => void;
+  closeSourceDrawer: () => void;
+  showToast: (message: string) => void;
 }
 
 let extractionTicker: ReturnType<typeof setInterval> | null = null;
 function clearExtractionTicker() {
   if (extractionTicker) clearInterval(extractionTicker);
   extractionTicker = null;
+}
+
+let toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+function now() {
+  return new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" }) + ", " + new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 }
 
 export const useStore = create<Store>()(
@@ -107,17 +135,116 @@ export const useStore = create<Store>()(
       heliosStage: "pre-upload",
       pipelineStageIndex: 0,
       pipelineCounters: { fields: 0, tables: 0 },
+      sourceDrawer: null,
+      toast: null,
 
       reset: () => {
         clearExtractionTicker();
         getActiveTimeline()?.cancel();
+        if (toastTimer) clearTimeout(toastTimer);
         set({
           ...staticSlices(),
           ...heliosEmpty(),
           heliosStage: "pre-upload",
           pipelineStageIndex: 0,
           pipelineCounters: { fields: 0, tables: 0 },
+          sourceDrawer: null,
+          toast: null,
         });
+      },
+
+      showToast: (message) => {
+        if (toastTimer) clearTimeout(toastTimer);
+        set({ toast: message });
+        toastTimer = setTimeout(() => set({ toast: null }), 2600);
+      },
+
+      openSourceDrawer: (payload) => set({ sourceDrawer: payload }),
+      closeSourceDrawer: () => set({ sourceDrawer: null }),
+
+      confirmField: (id) => {
+        set((s) => ({ canonicalFields: s.canonicalFields.map((f) => (f.id === id ? { ...f, status: "human-confirmed" as const } : f)) }));
+        get().showToast("Field confirmed");
+      },
+
+      overrideField: (id, value, reason) => {
+        set((s) => ({
+          canonicalFields: s.canonicalFields.map((f) =>
+            f.id === id
+              ? { ...f, status: "overridden" as const, value, override: { by: get().currentUser.name, at: now(), reason, previousValue: f.value } }
+              : f
+          ),
+        }));
+        get().showToast("Override logged");
+      },
+
+      addFieldManually: (id, value) => {
+        set((s) => ({
+          canonicalFields: s.canonicalFields.map((f) =>
+            f.id === id
+              ? { ...f, status: "human-confirmed" as const, value, confidence: 1, source: { doc: "—", page: 0, snippet: "" } }
+              : f
+          ),
+        }));
+        get().showToast("Field added");
+      },
+
+      resolveConflict: (id, chosen, note) => {
+        const conflict = get().conflicts.find((c) => c.id === id);
+        set((s) => ({
+          conflicts: s.conflicts.map((c) =>
+            c.id === id ? { ...c, status: "resolved" as const, resolution: { chosen: chosen.value, by: get().currentUser.name, at: now(), note } } : c
+          ),
+          canonicalFields: conflict
+            ? s.canonicalFields.map((f) =>
+                f.field === conflict.field
+                  ? {
+                      ...f,
+                      value: chosen.value,
+                      status: "human-confirmed" as const,
+                      confidence: chosen.confidence ?? 1,
+                      source: { doc: chosen.source, page: chosen.page ?? 0, snippet: chosen.snippet ?? f.source.snippet },
+                    }
+                  : f
+              )
+            : s.canonicalFields,
+        }));
+        get().showToast("Written to canonical record");
+      },
+
+      reopenConflict: (id) => {
+        set((s) => ({ conflicts: s.conflicts.map((c) => (c.id === id ? { ...c, status: "open" as const, resolution: undefined } : c)) }));
+        get().showToast("Conflict reopened");
+      },
+
+      escalateConflict: (id) => {
+        const conflict = get().conflicts.find((c) => c.id === id);
+        if (conflict) {
+          set((s) => ({
+            actionItems: [
+              { id: `esc-${id}`, text: `Escalated: ${conflict.field} conflict needs Principal sign-off`, owner: "S. Okafor", due: "TBD", done: false, source: "Reconciliation" },
+              ...s.actionItems,
+            ],
+          }));
+        }
+        get().showToast("Escalated to Principal");
+      },
+
+      dismissValidationFlag: (id) => {
+        set((s) => ({ validationFlags: s.validationFlags.filter((v) => v.id !== id) }));
+      },
+
+      createActionItemFromFlag: (id) => {
+        const flag = get().validationFlags.find((v) => v.id === id);
+        if (flag) {
+          set((s) => ({
+            actionItems: [
+              { id: `flag-${id}`, text: flag.message, owner: get().currentUser.name, due: "TBD", done: false, source: flag.rule },
+              ...s.actionItems,
+            ],
+          }));
+          get().showToast("Action item created");
+        }
       },
 
       setDocumentProgress: (id, patch) => {

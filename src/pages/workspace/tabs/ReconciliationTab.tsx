@@ -12,6 +12,9 @@ const ruleTone: Record<string, "blue" | "gray" | "red" | "orange"> = {
 export default function ReconciliationTab() {
   const conflicts = useStore((s) => s.conflicts);
   const validationFlags = useStore((s) => s.validationFlags);
+  const reopenConflict = useStore((s) => s.reopenConflict);
+  const dismissValidationFlag = useStore((s) => s.dismissValidationFlag);
+  const createActionItemFromFlag = useStore((s) => s.createActionItemFromFlag);
   const open = conflicts.filter((c) => c.status === "open");
   const resolved = conflicts.filter((c) => c.status === "resolved");
 
@@ -33,6 +36,14 @@ export default function ReconciliationTab() {
       </div>
 
       <p className="text-[15px] font-semibold tracking-tight">Value conflicts</p>
+      {open.length === 0 && (
+        <Card className="border-pos-100 bg-pos-50/40">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 size={15} className="text-pos-600" />
+            <p className="text-[13.5px] font-medium text-pos-800">All conflicts resolved</p>
+          </div>
+        </Card>
+      )}
       {open.map((c) => <ConflictCard key={c.id} c={c} />)}
 
       {resolved.map((c) => (
@@ -53,7 +64,7 @@ export default function ReconciliationTab() {
               </p>
               <p className="mt-1.5 text-[12.5px] italic text-ink-600">“{c.resolution?.note}”</p>
             </div>
-            <Button variant="ghost"><RotateCcw size={13} /> Reopen</Button>
+            <Button variant="ghost" onClick={() => reopenConflict(c.id)}><RotateCcw size={13} /> Reopen</Button>
           </div>
         </Card>
       ))}
@@ -65,6 +76,9 @@ export default function ReconciliationTab() {
             <CardHeader title="Validation layer" sub="Sanity, benchmark and cross-field logic checks — flagged by severity" />
           </div>
           <div className="divide-y divide-ink-100">
+            {validationFlags.length === 0 && (
+              <p className="px-5 py-6 text-center text-[12.5px] text-ink-400">No open validation flags.</p>
+            )}
             {validationFlags.map((v) => (
               <div key={v.id} className="flex items-start gap-4 px-5 py-4">
                 <Badge tone={ruleTone[v.rule] ?? "gray"}>{v.rule}</Badge>
@@ -75,8 +89,8 @@ export default function ReconciliationTab() {
                 </div>
                 <SeverityBadge severity={v.severity} />
                 <div className="flex shrink-0 gap-1">
-                  <button className="rounded-md px-2 py-1 text-[11.5px] font-medium text-ink-500 hover:bg-ink-100">Dismiss</button>
-                  <button className="rounded-md px-2 py-1 text-[11.5px] font-medium text-accent-700 hover:bg-accent-50">Create action item</button>
+                  <button onClick={() => dismissValidationFlag(v.id)} className="rounded-md px-2 py-1 text-[11.5px] font-medium text-ink-500 hover:bg-ink-100">Dismiss</button>
+                  <button onClick={() => createActionItemFromFlag(v.id)} className="rounded-md px-2 py-1 text-[11.5px] font-medium text-accent-700 hover:bg-accent-50">Create action item</button>
                 </div>
               </div>
             ))}
@@ -88,7 +102,23 @@ export default function ReconciliationTab() {
 }
 
 function ConflictCard({ c }: { c: Conflict }) {
+  const resolveConflict = useStore((s) => s.resolveConflict);
+  const escalateConflict = useStore((s) => s.escalateConflict);
   const [selected, setSelected] = useState<number | "override" | null>(null);
+  const [overrideValue, setOverrideValue] = useState("");
+  const [overrideReason, setOverrideReason] = useState("");
+
+  const canResolve = selected !== null && (selected !== "override" || (overrideValue.trim() && overrideReason.trim()));
+
+  function resolve() {
+    if (selected === "override") {
+      resolveConflict(c.id, { value: overrideValue.trim(), source: "Manual override" }, overrideReason.trim());
+    } else if (typeof selected === "number") {
+      const cand = c.candidates[selected];
+      resolveConflict(c.id, { value: cand.value, source: cand.source, page: cand.page, snippet: cand.snippet, confidence: cand.confidence }, `Selected ${cand.source} — highest-confidence, governing source.`);
+    }
+  }
+
   return (
     <Card>
       <div className="mb-4 flex items-center gap-2">
@@ -99,24 +129,30 @@ function ConflictCard({ c }: { c: Conflict }) {
       </div>
       <div className="grid grid-cols-4 gap-3">
         {c.candidates.map((cand, i) => (
-          <button
+          <div
             key={i}
+            role="button"
+            tabIndex={0}
             onClick={() => setSelected(i)}
+            onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setSelected(i)}
             className={cn(
-              "rounded-lg border p-3.5 text-left transition-all",
+              "cursor-pointer rounded-lg border p-3.5 text-left transition-all",
               selected === i ? "border-accent-600 bg-accent-50 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-ink-200 hover:border-ink-300"
             )}
           >
             <p className="num text-[19px] font-semibold tracking-tight">{cand.value}</p>
-            <div className="mt-2"><SourceChip doc={cand.source} page={cand.page} /></div>
+            <div className="mt-2"><SourceChip doc={cand.source} page={cand.page} field={c.field} value={cand.value} confidence={cand.confidence} snippet={cand.snippet} /></div>
             <div className="mt-2"><ConfidenceBar value={cand.confidence} /></div>
             <p className="mt-2 border-l-2 border-ink-200 pl-2 text-[11px] italic leading-snug text-ink-500">“{cand.snippet}”</p>
-          </button>
+          </div>
         ))}
-        <button
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => setSelected("override")}
+          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setSelected("override")}
           className={cn(
-            "rounded-lg border border-dashed p-3.5 text-left transition-all",
+            "cursor-pointer rounded-lg border border-dashed p-3.5 text-left transition-all",
             selected === "override" ? "border-accent-600 bg-accent-50" : "border-ink-300 hover:border-ink-400"
           )}
         >
@@ -124,17 +160,29 @@ function ConflictCard({ c }: { c: Conflict }) {
           <p className="mt-1 text-[11.5px] text-ink-500">Type the correct value — always wins over AI-extracted values, logged with your name and reason.</p>
           {selected === "override" && (
             <div className="mt-3 space-y-2" onClick={(e) => e.stopPropagation()}>
-              <input placeholder="Value" className="w-full rounded-lg border border-ink-200 bg-white px-2.5 py-1.5 text-[12.5px] outline-none focus:border-accent-500" />
-              <textarea placeholder="Reason (required)" rows={2} className="w-full rounded-lg border border-ink-200 bg-white px-2.5 py-1.5 text-[12.5px] outline-none focus:border-accent-500" />
+              <input
+                autoFocus
+                value={overrideValue}
+                onChange={(e) => setOverrideValue(e.target.value)}
+                placeholder="Value"
+                className="w-full rounded-lg border border-ink-200 bg-white px-2.5 py-1.5 text-[12.5px] outline-none focus:border-accent-500"
+              />
+              <textarea
+                value={overrideReason}
+                onChange={(e) => setOverrideReason(e.target.value)}
+                placeholder="Reason (required)"
+                rows={2}
+                className="w-full rounded-lg border border-ink-200 bg-white px-2.5 py-1.5 text-[12.5px] outline-none focus:border-accent-500"
+              />
             </div>
           )}
-        </button>
+        </div>
       </div>
       <div className="mt-4 flex items-center justify-between">
         <p className="text-[11.5px] text-ink-400">Resolution is written to the canonical table and logged in the audit trail.</p>
         <div className="flex gap-2">
-          <Button variant="ghost">Escalate to Principal</Button>
-          <Button className={cn(selected === null && "pointer-events-none opacity-40")}>Resolve conflict</Button>
+          <Button variant="ghost" onClick={() => escalateConflict(c.id)}>Escalate to Principal</Button>
+          <Button className={cn(!canResolve && "pointer-events-none opacity-40")} onClick={resolve}>Resolve conflict</Button>
         </div>
       </div>
     </Card>
