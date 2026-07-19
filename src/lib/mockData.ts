@@ -5,6 +5,7 @@
 
 export type Technology = "Solar" | "Wind" | "Infrastructure";
 export type InfraSubType = "Shopping Complex" | "Hostel" | "Logistics Park" | "Data Center";
+export type Severity = "critical" | "high" | "medium" | "low";
 
 export interface Project {
   id: string;
