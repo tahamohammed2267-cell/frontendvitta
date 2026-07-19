@@ -1,6 +1,6 @@
-import { CheckCircle2, MessageCircle, MessageSquareText } from "lucide-react";
+import { CheckCircle2, Lightbulb, MessageCircle, MessageSquareText } from "lucide-react";
 import { useStore } from "../../../lib/store";
-import { Badge, Card, CardHeader, ConfidenceBar, SeverityBadge, SourceChip } from "../../../lib/ui";
+import { Badge, Card, CardHeader, ConfidenceBar, EmptyState, SeverityBadge, SourceChip } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
 const sevOrder = { critical: 0, high: 1, medium: 2, low: 3 };
@@ -9,6 +9,15 @@ export default function IntelligenceTab() {
   const actionItems = useStore((s) => s.actionItems);
   const risks = useStore((s) => s.risks);
   const sorted = [...risks].sort((a, b) => sevOrder[a.severity] - sevOrder[b.severity]);
+
+  if (risks.length === 0) {
+    return (
+      <Card>
+        <EmptyState icon={<Lightbulb size={20} />} title="No findings yet" sub="Deal summary, risk register and action items appear here once extraction has run." />
+      </Card>
+    );
+  }
+
   return (
     <div className="grid grid-cols-3 gap-4">
       <div className="col-span-2 space-y-4">

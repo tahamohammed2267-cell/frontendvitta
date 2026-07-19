@@ -1,20 +1,43 @@
 import { Link } from "react-router-dom";
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { AlertTriangle, ArrowUpRight, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, CheckCircle2, FileUp, Loader2 } from "lucide-react";
 import { useStore } from "../../../lib/store";
-import { Badge, Card, CardHeader, ConfidenceBar, SourceChip, Stat } from "../../../lib/ui";
+import { Badge, Button, Card, CardHeader, ConfidenceBar, EmptyState, SourceChip, Stat } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
 const keyMetrics = ["f1", "f3", "f13", "f12", "f9", "f8"];
 const sevTone = { critical: "red", high: "orange", medium: "orange", low: "gray" } as const;
 
 export default function OverviewTab() {
+  const heliosStage = useStore((s) => s.heliosStage);
   const documents = useStore((s) => s.documents);
   const canonicalFields = useStore((s) => s.canonicalFields);
   const revenueProjection = useStore((s) => s.revenueProjection);
   const risks = useStore((s) => s.risks);
   const actionItems = useStore((s) => s.actionItems);
   const inFlight = documents.filter((d) => d.status !== "done");
+
+  if (heliosStage !== "done") {
+    return (
+      <Card>
+        <EmptyState
+          icon={<FileUp size={20} />}
+          title={heliosStage === "pre-upload" ? "Nothing extracted yet" : "Extraction in progress"}
+          sub={
+            heliosStage === "pre-upload"
+              ? "Upload the deal room documents to run the extraction pipeline and populate this overview."
+              : "Canonical values, findings and financials will appear here once the pipeline finishes running."
+          }
+        />
+        {heliosStage === "pre-upload" && (
+          <div className="flex justify-center pb-2">
+            <Link to="?tab=documents"><Button>Go to Documents</Button></Link>
+          </div>
+        )}
+      </Card>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* KPI row */}

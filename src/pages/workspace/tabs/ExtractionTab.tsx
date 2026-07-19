@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, Download, Plus, Search } from "lucide-react";
+import { ChevronDown, Database, Download, Plus, Search } from "lucide-react";
 import type { CanonicalField } from "../../../lib/mockData";
 import { useStore } from "../../../lib/store";
-import { Badge, Button, Card, ConfidenceBar, SourceChip } from "../../../lib/ui";
+import { Badge, Button, Card, ConfidenceBar, EmptyState, SourceChip } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
 const statusMeta: Record<CanonicalField["status"], { label: string; tone: "blue" | "green" | "dark" | "red" }> = {
@@ -44,6 +44,14 @@ export default function ExtractionTab() {
   );
 
   const count = (s: CanonicalField["status"]) => canonicalFields.filter((f) => f.status === s).length;
+
+  if (canonicalFields.length === 0) {
+    return (
+      <Card>
+        <EmptyState icon={<Database size={20} />} title="No canonical fields yet" sub="Upload documents and run extraction from the Documents tab to populate this view." />
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-4">

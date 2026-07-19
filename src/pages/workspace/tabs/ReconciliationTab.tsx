@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { CheckCircle2, RotateCcw } from "lucide-react";
+import { CheckCircle2, RotateCcw, ShieldCheck } from "lucide-react";
 import type { Conflict } from "../../../lib/mockData";
 import { useStore } from "../../../lib/store";
-import { Badge, Button, Card, CardHeader, ConfidenceBar, SeverityBadge, SourceChip } from "../../../lib/ui";
+import { Badge, Button, Card, CardHeader, ConfidenceBar, EmptyState, SeverityBadge, SourceChip } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
 const ruleTone: Record<string, "blue" | "gray" | "red" | "orange"> = {
@@ -14,6 +14,14 @@ export default function ReconciliationTab() {
   const validationFlags = useStore((s) => s.validationFlags);
   const open = conflicts.filter((c) => c.status === "open");
   const resolved = conflicts.filter((c) => c.status === "resolved");
+
+  if (conflicts.length === 0 && validationFlags.length === 0) {
+    return (
+      <Card>
+        <EmptyState icon={<ShieldCheck size={20} />} title="Nothing to reconcile yet" sub="Conflicts and validation flags surface here once documents have been uploaded and extraction has run." />
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-4">
