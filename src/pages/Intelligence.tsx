@@ -1,5 +1,5 @@
 import { BookOpen, Lightbulb } from "lucide-react";
-import { benchmarks } from "../lib/mockData";
+import { useStore } from "../lib/store";
 import { Badge, Card, CardHeader, Stat } from "../lib/ui";
 import { cn } from "../lib/cn";
 
@@ -26,6 +26,7 @@ const lessons = [
 ];
 
 export default function Intelligence() {
+  const benchmarks = useStore((s) => s.benchmarks);
   return (
     <div className="mx-auto max-w-[1200px] px-6 py-6">
       <div className="mb-6 fade-up">

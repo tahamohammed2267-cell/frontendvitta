@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { AlertTriangle, ArrowUpRight, CheckCircle2, Loader2 } from "lucide-react";
-import { actionItems, canonicalFields, documents, revenueProjection, risks } from "../../../lib/mockData";
+import { useStore } from "../../../lib/store";
 import { Badge, Card, CardHeader, ConfidenceBar, SourceChip, Stat } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
@@ -9,6 +9,11 @@ const keyMetrics = ["f1", "f3", "f13", "f12", "f9", "f8"];
 const sevTone = { critical: "red", high: "orange", medium: "orange", low: "gray" } as const;
 
 export default function OverviewTab() {
+  const documents = useStore((s) => s.documents);
+  const canonicalFields = useStore((s) => s.canonicalFields);
+  const revenueProjection = useStore((s) => s.revenueProjection);
+  const risks = useStore((s) => s.risks);
+  const actionItems = useStore((s) => s.actionItems);
   const inFlight = documents.filter((d) => d.status !== "done");
   return (
     <div className="space-y-4">

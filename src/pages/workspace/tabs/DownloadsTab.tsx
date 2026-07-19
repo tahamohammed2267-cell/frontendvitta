@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Database, Download, FileSpreadsheet, FileText, FileType, Presentation } from "lucide-react";
-import { generatedFiles } from "../../../lib/mockData";
+import { useStore } from "../../../lib/store";
 import { Badge, Card } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
@@ -17,6 +17,7 @@ const filters = ["All", "Excel Model", "IC Memo (Word)", "IC Memo (PDF)", "IC De
 
 export default function DownloadsTab() {
   const [filter, setFilter] = useState<(typeof filters)[number]>("All");
+  const generatedFiles = useStore((s) => s.generatedFiles);
   const rows = generatedFiles.filter((f) => {
     if (filter === "All") return true;
     if (filter === "Exports") return f.kind.includes("Export");

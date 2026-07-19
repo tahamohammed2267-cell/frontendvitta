@@ -1,11 +1,13 @@
 import { CheckCircle2, Circle, MinusCircle, Plus } from "lucide-react";
-import { checklist, type ChecklistItem } from "../../../lib/mockData";
+import type { ChecklistItem } from "../../../lib/mockData";
+import { useStore } from "../../../lib/store";
 import { Badge, Button, Card, SectionLabel, SeverityBadge } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
 const sevRank = { blocking: 0, important: 1, "nice-to-have": 2 };
 
 export default function ChecklistTab() {
+  const checklist = useStore((s) => s.checklist);
   const present = checklist.filter((c) => c.status === "present").length;
   const partial = checklist.filter((c) => c.status === "partial").length;
   const missing = checklist.filter((c) => c.status === "missing").length;

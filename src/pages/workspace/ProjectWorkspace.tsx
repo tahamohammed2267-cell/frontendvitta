@@ -1,6 +1,6 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Play, Share2 } from "lucide-react";
-import { checklist, conflicts, documents, projects } from "../../lib/mockData";
+import { useStore } from "../../lib/store";
 import { Badge, Button } from "../../lib/ui";
 import { cn } from "../../lib/cn";
 import OverviewTab from "./tabs/OverviewTab";
@@ -12,22 +12,26 @@ import ChecklistTab from "./tabs/ChecklistTab";
 import OutputsTab from "./tabs/OutputsTab";
 import DownloadsTab from "./tabs/DownloadsTab";
 
-const tabs = [
-  { id: "overview", label: "Overview" },
-  { id: "documents", label: "Documents", count: documents.length },
-  { id: "extraction", label: "Data Extraction" },
-  { id: "reconciliation", label: "Reconciliation", count: conflicts.filter((c) => c.status === "open").length, warn: true },
-  { id: "intelligence", label: "Intelligence" },
-  { id: "checklist", label: "Checklist", count: checklist.filter((c) => c.status !== "present").length, warn: true },
-  { id: "outputs", label: "Outputs" },
-  { id: "downloads", label: "Downloads" },
-];
-
 export default function ProjectWorkspace() {
   const { id } = useParams();
   const [params, setParams] = useSearchParams();
   const tab = params.get("tab") ?? "overview";
+  const projects = useStore((s) => s.projects);
+  const documents = useStore((s) => s.documents);
+  const conflicts = useStore((s) => s.conflicts);
+  const checklist = useStore((s) => s.checklist);
   const project = projects.find((p) => p.id === id) ?? projects[0];
+
+  const tabs = [
+    { id: "overview", label: "Overview" },
+    { id: "documents", label: "Documents", count: documents.length },
+    { id: "extraction", label: "Data Extraction" },
+    { id: "reconciliation", label: "Reconciliation", count: conflicts.filter((c) => c.status === "open").length, warn: true },
+    { id: "intelligence", label: "Intelligence" },
+    { id: "checklist", label: "Checklist", count: checklist.filter((c) => c.status !== "present").length, warn: true },
+    { id: "outputs", label: "Outputs" },
+    { id: "downloads", label: "Downloads" },
+  ];
 
   return (
     <div>

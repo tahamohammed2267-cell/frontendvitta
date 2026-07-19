@@ -1,9 +1,11 @@
 import { ArrowUp, MessageSquareText, Mic, Paperclip, Plus } from "lucide-react";
-import { chatSample, suggestedPrompts } from "../lib/mockData";
+import { useStore } from "../lib/store";
 import { Badge, SourceChip } from "../lib/ui";
 import { cn } from "../lib/cn";
 
 export default function ChatPanel({ context }: { context: "firm" | "project" }) {
+  const chatSample = useStore((s) => s.chatSample);
+  const suggestedPrompts = useStore((s) => s.suggestedPrompts);
   return (
     <div className="flex h-full flex-col">
       {/* Header */}

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Building2, Plus, Search, Sun, Wind } from "lucide-react";
-import { projects, type Project } from "../lib/mockData";
+import type { Project } from "../lib/mockData";
+import { useStore } from "../lib/store";
 import { Badge, Button, Card } from "../lib/ui";
 import { cn } from "../lib/cn";
 
@@ -15,6 +16,7 @@ export default function Projects() {
   const [filter, setFilter] = useState<(typeof filters)[number]>("All");
   const [q, setQ] = useState("");
   const navigate = useNavigate();
+  const projects = useStore((s) => s.projects);
 
   const rows = projects.filter(
     (p) => (filter === "All" || p.status === filter) && p.name.toLowerCase().includes(q.toLowerCase())

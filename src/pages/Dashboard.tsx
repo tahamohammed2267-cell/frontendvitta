@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowUpRight, FileUp, MessageSquareText, Plus, Sun, Wind, Building2, AlertTriangle } from "lucide-react";
-import { knowledgeGrowth, projects } from "../lib/mockData";
+import { useStore } from "../lib/store";
 import { Badge, Card, CardHeader, Stat } from "../lib/ui";
 import { cn } from "../lib/cn";
 
@@ -20,6 +20,8 @@ const activity = [
 ];
 
 export default function Dashboard() {
+  const projects = useStore((s) => s.projects);
+  const knowledgeGrowth = useStore((s) => s.knowledgeGrowth);
   return (
     <div className="mx-auto max-w-[1200px] px-6 py-6">
       {/* Header */}

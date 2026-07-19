@@ -523,7 +523,7 @@ export const revenueProjection = [
 ];
 
 export const fundingWaterfall = [
-  { name: "Senior Debt", value: 67.5, color: "#2563eb" },
+  { name: "Senior Debt", value: 67.5, color: "#0e5f45" },
   { name: "Sponsor Equity", value: 24.1, color: "#059669" },
   { name: "Mezzanine", value: 4.8, color: "#d97706" },
 ];

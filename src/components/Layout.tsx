@@ -1,11 +1,12 @@
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, FolderKanban, Lightbulb, Briefcase, Search, Network,
   Settings, Plus, PanelRightClose, PanelRightOpen, Command,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "../lib/cn";
-import { currentUser } from "../lib/mockData";
+import { useStore } from "../lib/store";
+import { getActiveTimeline } from "../lib/timeline";
 import ChatPanel from "../components/ChatPanel";
 
 const nav = [
@@ -19,7 +20,49 @@ const nav = [
 export default function Layout() {
   const [aiOpen, setAiOpen] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
+  const currentUser = useStore((s) => s.currentUser);
+  const reset = useStore((s) => s.reset);
   const inProject = location.pathname.startsWith("/projects/") && location.pathname !== "/projects/new";
+
+  // Presenter hotkeys (invisible, no UI): r resets all demo state; 1/2/3
+  // jump to the three acts; / opens search; → / ⇧→ skip or complete
+  // whatever scripted sequence is currently running.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      switch (e.key) {
+        case "r":
+          reset();
+          break;
+        case "/":
+          e.preventDefault();
+          navigate("/search");
+          break;
+        case "1":
+          navigate("/");
+          break;
+        case "2":
+          navigate("/portfolio");
+          break;
+        case "3":
+          navigate("/intelligence");
+          break;
+        case "ArrowRight": {
+          const t = getActiveTimeline();
+          if (!t) break;
+          e.preventDefault();
+          if (e.shiftKey) t.complete();
+          else t.skip();
+          break;
+        }
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [navigate, reset]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-ink-50">

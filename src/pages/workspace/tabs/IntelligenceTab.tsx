@@ -1,11 +1,13 @@
 import { CheckCircle2, MessageCircle, MessageSquareText } from "lucide-react";
-import { actionItems, risks } from "../../../lib/mockData";
+import { useStore } from "../../../lib/store";
 import { Badge, Card, CardHeader, ConfidenceBar, SeverityBadge, SourceChip } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
 const sevOrder = { critical: 0, high: 1, medium: 2, low: 3 };
 
 export default function IntelligenceTab() {
+  const actionItems = useStore((s) => s.actionItems);
+  const risks = useStore((s) => s.risks);
   const sorted = [...risks].sort((a, b) => sevOrder[a.severity] - sevOrder[b.severity]);
   return (
     <div className="grid grid-cols-3 gap-4">

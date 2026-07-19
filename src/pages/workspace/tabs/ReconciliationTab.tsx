@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CheckCircle2, RotateCcw } from "lucide-react";
-import { conflicts, validationFlags, type Conflict } from "../../../lib/mockData";
+import type { Conflict } from "../../../lib/mockData";
+import { useStore } from "../../../lib/store";
 import { Badge, Button, Card, CardHeader, ConfidenceBar, SeverityBadge, SourceChip } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
@@ -9,6 +10,8 @@ const ruleTone: Record<string, "blue" | "gray" | "red" | "orange"> = {
 };
 
 export default function ReconciliationTab() {
+  const conflicts = useStore((s) => s.conflicts);
+  const validationFlags = useStore((s) => s.validationFlags);
   const open = conflicts.filter((c) => c.status === "open");
   const resolved = conflicts.filter((c) => c.status === "resolved");
 

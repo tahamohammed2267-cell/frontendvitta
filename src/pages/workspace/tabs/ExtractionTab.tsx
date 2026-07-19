@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, Download, Plus, Search } from "lucide-react";
-import { canonicalFields, type CanonicalField } from "../../../lib/mockData";
+import type { CanonicalField } from "../../../lib/mockData";
+import { useStore } from "../../../lib/store";
 import { Badge, Button, Card, ConfidenceBar, SourceChip } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
@@ -23,6 +24,7 @@ const passes = [
 const statusFilters = ["all", "ai-extracted", "human-confirmed", "overridden", "computed", "missing"] as const;
 
 export default function ExtractionTab() {
+  const canonicalFields = useStore((s) => s.canonicalFields);
   const [cat, setCat] = useState<string | null>(null);
   const [status, setStatus] = useState<(typeof statusFilters)[number]>("all");
   const [q, setQ] = useState("");
@@ -32,7 +34,7 @@ export default function ExtractionTab() {
     const m = new Map<string, number>();
     canonicalFields.forEach((f) => m.set(f.category, (m.get(f.category) ?? 0) + 1));
     return [...m.entries()];
-  }, []);
+  }, [canonicalFields]);
 
   const rows = canonicalFields.filter(
     (f) =>

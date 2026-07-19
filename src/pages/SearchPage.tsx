@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Command, Search } from "lucide-react";
-import { suggestedPrompts } from "../lib/mockData";
+import { useStore } from "../lib/store";
 import { Badge, Card, ConfidenceBar, SourceChip } from "../lib/ui";
 
 const results = [
@@ -41,6 +41,7 @@ const typeTone: Record<string, "blue" | "red" | "green" | "gray" | "orange"> = {
 };
 
 export default function SearchPage() {
+  const suggestedPrompts = useStore((s) => s.suggestedPrompts);
   return (
     <div className="mx-auto max-w-[1100px] px-6 py-8">
       {/* Hero */}

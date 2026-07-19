@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Bar, BarChart, Cell, Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { Check, FileDown, FileSpreadsheet, FileText, FileType, Pencil, Play, Presentation, UploadCloud } from "lucide-react";
-import { fundingWaterfall, icDeckSlides, icMemoSections, revenueProjection } from "../../../lib/mockData";
+import { useStore } from "../../../lib/store";
 import { Badge, Button, Card, SourceChip } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
@@ -30,6 +30,10 @@ const blueprintRows: { cell: string; field: string; value: string; state: "popul
 
 export default function OutputsTab() {
   const [preview, setPreview] = useState<Preview>(null);
+  const fundingWaterfall = useStore((s) => s.fundingWaterfall);
+  const icDeckSlides = useStore((s) => s.icDeckSlides);
+  const icMemoSections = useStore((s) => s.icMemoSections);
+  const revenueProjection = useStore((s) => s.revenueProjection);
   return (
     <div className="space-y-4">
       {/* Computed workbook banner */}
@@ -86,8 +90,8 @@ export default function OutputsTab() {
             </div>
           </div>
           {preview === "excel" && <ExcelPreview />}
-          {(preview === "word" || preview === "pdf") && <MemoPreview />}
-          {preview === "deck" && <DeckPreview />}
+          {(preview === "word" || preview === "pdf") && <MemoPreview icMemoSections={icMemoSections} />}
+          {preview === "deck" && <DeckPreview icDeckSlides={icDeckSlides} fundingWaterfall={fundingWaterfall} revenueProjection={revenueProjection} />}
         </Card>
       )}
     </div>
@@ -129,7 +133,7 @@ function ExcelPreview() {
   );
 }
 
-function MemoPreview() {
+function MemoPreview({ icMemoSections }: { icMemoSections: string[] }) {
   const drafted = ["Executive Summary", "Transaction Overview", "Risk Factors"];
   return (
     <div className="grid grid-cols-[1fr_240px] gap-6">
@@ -173,14 +177,20 @@ function MemoPreview() {
   );
 }
 
-function DeckPreview() {
+function DeckPreview({
+  icDeckSlides, fundingWaterfall, revenueProjection,
+}: {
+  icDeckSlides: string[];
+  fundingWaterfall: { name: string; value: number; color: string }[];
+  revenueProjection: { year: string; revenue: number; cfads: number }[];
+}) {
   return (
     <div className="grid grid-cols-5 gap-3">
       {icDeckSlides.map((s, i) => (
         <div key={s} className="aspect-video rounded-lg border border-ink-200 bg-white p-2.5 shadow-[0_1px_2px_rgba(11,14,20,0.04)]">
           <div className="flex items-center justify-between">
             <span className="num text-[9px] font-semibold text-ink-300">{String(i + 1).padStart(2, "0")}</span>
-            {i === 0 && <span className="text-[8px] font-bold tracking-wide text-ink-900">VITTA</span>}
+            {i === 0 && <span className="text-[8px] font-bold tracking-wide text-ink-900">vitta</span>}
           </div>
           <p className="mt-1 text-[10.5px] font-semibold leading-tight">{s}</p>
           {s === "Funding Breakdown" ? (

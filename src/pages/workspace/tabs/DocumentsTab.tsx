@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CheckCircle2, ChevronDown, FileUp, ScanText } from "lucide-react";
-import { documents, type DealDocument } from "../../../lib/mockData";
+import type { DealDocument } from "../../../lib/mockData";
+import { useStore } from "../../../lib/store";
 import { Badge, Card, SourceChip } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
@@ -21,6 +22,7 @@ const sampleExtractions: Record<string, { field: string; value: string; page: nu
 
 export default function DocumentsTab() {
   const [open, setOpen] = useState<string | null>(null);
+  const documents = useStore((s) => s.documents);
   const done = documents.filter((d) => d.status === "done");
 
   return (

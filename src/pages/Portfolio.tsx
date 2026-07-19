@@ -1,5 +1,5 @@
 import { Line, LineChart, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { portfolio } from "../lib/mockData";
+import { useStore } from "../lib/store";
 import { Badge, Card, CardHeader, Stat } from "../lib/ui";
 
 const colors = ["#0e5f45", "#1d4ed8", "#b45309", "#7c3aed"];
@@ -9,13 +9,13 @@ const alerts = [
   { text: "Atlas Student Living — occupancy at record 94%", sev: "Low" as const, when: "1w ago" },
 ];
 
-// merge trend arrays into recharts rows
-const trendRows = portfolio[0].trend.map((_, i) => ({
-  q: `Q${i + 1}`,
-  ...Object.fromEntries(portfolio.map((p) => [p.name, p.trend[i]])),
-}));
-
 export default function Portfolio() {
+  const portfolio = useStore((s) => s.portfolio);
+  // merge trend arrays into recharts rows
+  const trendRows = portfolio[0].trend.map((_, i) => ({
+    q: `Q${i + 1}`,
+    ...Object.fromEntries(portfolio.map((p) => [p.name, p.trend[i]])),
+  }));
   return (
     <div className="mx-auto max-w-[1200px] px-6 py-6">
       <div className="mb-6 fade-up">
