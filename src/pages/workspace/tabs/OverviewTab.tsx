@@ -14,7 +14,7 @@ export default function OverviewTab() {
     <div className="space-y-4">
       {/* KPI row */}
       <div className="grid grid-cols-4 gap-4">
-        <Card><Stat label="Deal size" value="€96M" sub="70% debt · 30% equity" /></Card>
+        <Card><Stat label="Deal size" value="€96m" sub="70.0% debt · 30.0% equity" /></Card>
         <Card>
           <Stat label="Fields confirmed" value="87 / 124" sub="70% of canonical model" />
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-ink-100"><div className="h-full w-[70%] rounded-full bg-accent-600" /></div>
@@ -91,11 +91,11 @@ export default function OverviewTab() {
             <div className="h-[220px]">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={revenueProjection} margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#eceef3" vertical={false} />
+                  <CartesianGrid strokeDasharray="none" stroke="#f5f5f4" vertical={false} />
                   <XAxis dataKey="year" tick={{ fontSize: 11, fill: "#8a93a6" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "#8a93a6" }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 10, border: "1px solid #dde1e9" }} />
-                  <Bar dataKey="revenue" fill="#2563eb" radius={[4, 4, 0, 0]} barSize={22} name="Revenue" />
+                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #dde1e9" }} />
+                  <Bar dataKey="revenue" fill="#0e5f45" radius={[4, 4, 0, 0]} barSize={22} name="Revenue" />
                   <Line type="monotone" dataKey="cfads" stroke="#059669" strokeWidth={2} dot={false} name="CFADS" />
                 </ComposedChart>
               </ResponsiveContainer>
@@ -106,7 +106,7 @@ export default function OverviewTab() {
         {/* Right col */}
         <div className="space-y-4">
           <Card>
-            <CardHeader title="AI findings" sub="Latest from the intelligence layer" right={<Link to="?tab=intelligence" className="text-[12.5px] font-medium text-accent-600">All</Link>} />
+            <CardHeader title="Findings" sub="Latest from the intelligence layer" right={<Link to="?tab=intelligence" className="text-[12.5px] font-medium text-accent-600">All</Link>} />
             <div className="space-y-3">
               {risks.slice(0, 4).map((r) => (
                 <div key={r.id} className="flex gap-2.5">
@@ -153,7 +153,7 @@ function StageStepper({ status }: { status: string }) {
       {stages.map((s, i) => (
         <div key={s} className="flex items-center gap-1">
           <span className={cn(
-            "rounded-full px-2 py-0.5 text-[10.5px] font-medium",
+            "rounded-md px-2 py-0.5 text-[10.5px] font-medium",
             i < current || status === "done" ? "bg-pos-100 text-pos-700" : i === current ? "bg-accent-100 text-accent-700 pulse-soft" : "bg-ink-100 text-ink-400"
           )}>
             {s}

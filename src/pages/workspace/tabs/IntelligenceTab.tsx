@@ -1,4 +1,4 @@
-import { CheckCircle2, MessageCircle, Sparkles } from "lucide-react";
+import { CheckCircle2, MessageCircle, MessageSquareText } from "lucide-react";
 import { actionItems, risks } from "../../../lib/mockData";
 import { Badge, Card, CardHeader, ConfidenceBar, SeverityBadge, SourceChip } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
@@ -13,9 +13,9 @@ export default function IntelligenceTab() {
         {/* AI summary */}
         <Card>
           <CardHeader
-            title="AI Deal Summary"
+            title="Deal Summary"
             sub="Generated from 14 documents · updated 2h ago"
-            right={<Badge tone="blue"><Sparkles size={11} /> Vitta AI</Badge>}
+            right={<Badge tone="blue"><MessageSquareText size={11} /> vitta</Badge>}
           />
           <div className="space-y-3 text-[13.5px] leading-relaxed text-ink-800">
             <p>
@@ -56,7 +56,7 @@ export default function IntelligenceTab() {
             </div>
             <div className="mt-3 flex flex-wrap gap-1.5">
               {r.suggestedQuestions.map((q) => (
-                <button key={q} className="flex items-center gap-1.5 rounded-full border border-ink-200 px-2.5 py-1 text-[11.5px] text-ink-600 transition-colors hover:border-accent-500 hover:text-accent-700">
+                <button key={q} className="flex items-center gap-1.5 rounded-md border border-ink-200 px-2.5 py-1 text-[11.5px] text-ink-600 transition-colors hover:border-accent-500 hover:text-accent-700">
                   <MessageCircle size={11} /> {q}
                 </button>
               ))}
@@ -68,7 +68,7 @@ export default function IntelligenceTab() {
       {/* Right rail */}
       <div className="space-y-4">
         <Card>
-          <CardHeader title="Action items" sub="Maintained by Vitta AI + team" />
+          <CardHeader title="Action items" sub="Maintained by vitta + team" />
           <div className="space-y-2.5">
             {actionItems.map((a) => (
               <div key={a.id} className="flex items-start gap-2.5">

@@ -4,13 +4,7 @@ import { documents, type DealDocument } from "../../../lib/mockData";
 import { Badge, Card, SourceChip } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
-const fmtStyle: Record<string, string> = {
-  PDF: "bg-crit-50 text-crit-700 border-crit-100",
-  DOCX: "bg-accent-50 text-accent-700 border-accent-100",
-  XLSX: "bg-pos-50 text-pos-700 border-pos-100",
-  PPTX: "bg-warn-50 text-warn-700 border-warn-100",
-  PNG: "bg-ink-100 text-ink-600 border-ink-200",
-};
+const fmtChip = "bg-ink-50 text-ink-600 border-ink-200";
 
 const sampleExtractions: Record<string, { field: string; value: string; page: number }[]> = {
   d1: [
@@ -32,7 +26,7 @@ export default function DocumentsTab() {
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="flex items-center gap-6 rounded-xl border border-ink-200 bg-white px-5 py-3.5 text-[12.5px]">
+      <div className="flex items-center gap-6 rounded-lg border border-ink-200 bg-white px-5 py-3.5 text-[12.5px]">
         <span className="text-ink-500"><span className="num font-semibold text-ink-900">14</span> uploaded</span>
         <span className="text-ink-500"><span className="num font-semibold text-pos-700">11</span> complete</span>
         <span className="text-ink-500"><span className="num font-semibold text-accent-700">3</span> processing</span>
@@ -41,8 +35,8 @@ export default function DocumentsTab() {
       </div>
 
       {/* Dropzone */}
-      <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-ink-200 bg-white py-9 text-center transition-colors hover:border-accent-500/50 hover:bg-accent-50/30">
-        <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-accent-50 text-accent-600"><FileUp size={18} /></div>
+      <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-ink-200 bg-white py-9 text-center transition-colors hover:border-accent-500/50 hover:bg-accent-50/30">
+        <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-accent-50 text-accent-600"><FileUp size={18} /></div>
         <p className="text-[13.5px] font-medium">Drop deal documents here</p>
         <p className="mt-1 text-[12px] text-ink-500">PDF, DOCX, XLSX, PPTX, scanned images · parsing, classification and extraction run automatically</p>
       </div>
@@ -79,7 +73,7 @@ function DocRow({ d, open, onToggle }: { d: DealDocument; open: boolean; onToggl
       <tr onClick={onToggle} className="cursor-pointer transition-colors hover:bg-ink-50">
         <td className="px-5 py-3">
           <div className="flex items-center gap-2.5">
-            <span className={cn("rounded border px-1.5 py-0.5 text-[10px] font-bold", fmtStyle[d.format])}>{d.format}</span>
+            <span className={cn("rounded border px-1.5 py-0.5 text-[10px] font-bold", fmtChip)}>{d.format}</span>
             <span className="max-w-[280px] truncate text-[13px] font-medium">{d.name}</span>
             {d.ocrApplied && <Badge tone="gray">OCR</Badge>}
           </div>

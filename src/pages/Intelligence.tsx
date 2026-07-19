@@ -1,4 +1,4 @@
-import { BookOpen, Sparkles } from "lucide-react";
+import { BookOpen, Lightbulb } from "lucide-react";
 import { benchmarks } from "../lib/mockData";
 import { Badge, Card, CardHeader, Stat } from "../lib/ui";
 import { cn } from "../lib/cn";
@@ -86,7 +86,7 @@ export default function Intelligence() {
             <div className="space-y-3">
               {insights.map((x) => (
                 <Card key={x.title} className="flex gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-50 text-accent-600"><Sparkles size={15} /></div>
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-50 text-accent-600"><Lightbulb size={15} /></div>
                   <div>
                     <p className="text-[13.5px] font-semibold">{x.title}</p>
                     <p className="mt-1 text-[12.5px] leading-relaxed text-ink-600">{x.body}</p>

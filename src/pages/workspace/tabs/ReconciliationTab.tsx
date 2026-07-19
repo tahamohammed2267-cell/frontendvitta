@@ -92,7 +92,7 @@ function ConflictCard({ c }: { c: Conflict }) {
             key={i}
             onClick={() => setSelected(i)}
             className={cn(
-              "rounded-xl border p-3.5 text-left transition-all",
+              "rounded-lg border p-3.5 text-left transition-all",
               selected === i ? "border-accent-600 bg-accent-50 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-ink-200 hover:border-ink-300"
             )}
           >
@@ -105,7 +105,7 @@ function ConflictCard({ c }: { c: Conflict }) {
         <button
           onClick={() => setSelected("override")}
           className={cn(
-            "rounded-xl border border-dashed p-3.5 text-left transition-all",
+            "rounded-lg border border-dashed p-3.5 text-left transition-all",
             selected === "override" ? "border-accent-600 bg-accent-50" : "border-ink-300 hover:border-ink-400"
           )}
         >

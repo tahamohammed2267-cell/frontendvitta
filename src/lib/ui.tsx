@@ -5,7 +5,7 @@ import { cn } from "./cn";
 
 export function Card({ children, className, pad = true }: { children: ReactNode; className?: string; pad?: boolean }) {
   return (
-    <div className={cn("rounded-xl border border-ink-200 bg-white shadow-[0_1px_2px_rgba(11,14,20,0.04)]", pad && "p-5", className)}>
+    <div className={cn("rounded-lg border border-ink-200 bg-white", pad && "p-5", className)}>
       {children}
     </div>
   );
@@ -36,7 +36,7 @@ const toneStyles: Record<string, string> = {
 
 export function Badge({ tone = "gray", children, className }: { tone?: keyof typeof toneStyles; children: ReactNode; className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium", toneStyles[tone], className)}>
+    <span className={cn("inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-medium", toneStyles[tone], className)}>
       {children}
     </span>
   );
@@ -89,7 +89,7 @@ export function Button({
   children, variant = "primary", className, onClick,
 }: { children: ReactNode; variant?: "primary" | "secondary" | "ghost"; className?: string; onClick?: () => void }) {
   const styles = {
-    primary: "bg-accent-600 text-white hover:bg-accent-700 shadow-[0_1px_2px_rgba(37,99,235,0.3)]",
+    primary: "bg-accent-600 text-white hover:bg-accent-700",
     secondary: "border border-ink-200 bg-white text-ink-800 hover:bg-ink-50",
     ghost: "text-ink-600 hover:bg-ink-100",
   };
@@ -125,7 +125,7 @@ export function SectionLabel({ children }: { children: ReactNode }) {
 export function EmptyState({ icon, title, sub }: { icon: ReactNode; title: string; sub?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-14 text-center">
-      <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-ink-100 text-ink-400">{icon}</div>
+      <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-ink-100 text-ink-400">{icon}</div>
       <p className="text-[14px] font-medium text-ink-800">{title}</p>
       {sub && <p className="mt-1 max-w-sm text-[12.5px] text-ink-500">{sub}</p>}
     </div>

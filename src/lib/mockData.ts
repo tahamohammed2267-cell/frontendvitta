@@ -234,7 +234,7 @@ export const documents: DealDocument[] = [
   { id: "d6", name: "Insurance_Placement_Slip.pdf", type: "Insurance", status: "done", pages: 12, sizeMB: 1.2, uploadedAt: "Jul 13, 09:20", uploadedBy: "A. Lindqvist", progress: 100, fieldsExtracted: 9, ocrApplied: false, format: "PDF" },
   { id: "d7", name: "Grid_Connection_Agreement.pdf", type: "Grid Connection Agreement", status: "done", pages: 58, sizeMB: 5.6, uploadedAt: "Jul 13, 09:24", uploadedBy: "A. Lindqvist", progress: 100, fieldsExtracted: 12, ocrApplied: false, format: "PDF" },
   { id: "d8", name: "Om_Agreement_Draft.docx", type: "O&M Agreement", status: "done", pages: 36, sizeMB: 2.8, uploadedAt: "Jul 14, 14:02", uploadedBy: "J. Moreau", progress: 100, fieldsExtracted: 11, ocrApplied: false, format: "DOCX" },
-  { id: "d9", name: "Term_Sheet_VittaCapital.pdf", type: "Term Sheet", status: "done", pages: 9, sizeMB: 0.8, uploadedAt: "Jul 14, 14:05", uploadedBy: "J. Moreau", progress: 100, fieldsExtracted: 16, ocrApplied: false, format: "PDF" },
+  { id: "d9", name: "Term_Sheet_Northbridge.pdf", type: "Term Sheet", status: "done", pages: 9, sizeMB: 0.8, uploadedAt: "Jul 14, 14:05", uploadedBy: "J. Moreau", progress: 100, fieldsExtracted: 16, ocrApplied: false, format: "PDF" },
   { id: "d10", name: "Permits_Bundle_Sevilla.pdf", type: "Permits & Licenses", status: "done", pages: 133, sizeMB: 24.1, uploadedAt: "Jul 15, 08:47", uploadedBy: "R. Chen", progress: 100, fieldsExtracted: 18, ocrApplied: true, format: "PDF" },
   { id: "d11", name: "Environmental_Impact_Study.pdf", type: "Environmental Report", status: "extracting", pages: 187, sizeMB: 31.2, uploadedAt: "Jul 17, 16:30", uploadedBy: "R. Chen", progress: 64, fieldsExtracted: 7, ocrApplied: true, format: "PDF" },
   { id: "d12", name: "Lender_Technical_Advisor_Scope.docx", type: "Technical Advisory", status: "classifying", pages: 15, sizeMB: 1.9, uploadedAt: "Jul 18, 09:12", uploadedBy: "A. Lindqvist", progress: 38, fieldsExtracted: 0, ocrApplied: false, format: "DOCX" },
@@ -283,27 +283,27 @@ export const canonicalFields: CanonicalField[] = [
   },
   {
     id: "f8", field: "Debt Facility Size", category: "Financing", value: "€67.5M", numericValue: 67.5, unit: "€M",
-    confidence: 0.95, source: { doc: "Term_Sheet_VittaCapital.pdf", page: 2, snippet: "…senior secured facility of EUR 67,500,000, approximately 70% of total project cost…" },
+    confidence: 0.95, source: { doc: "Term_Sheet_Northbridge.pdf", page: 2, snippet: "…senior secured facility of EUR 67,500,000, approximately 70% of total project cost…" },
     status: "human-confirmed", aliases: ["Senior Debt", "Facility Amount"],
   },
   {
     id: "f9", field: "Gearing", category: "Financing", value: "70 %", numericValue: 70, unit: "%",
-    confidence: 0.95, source: { doc: "Term_Sheet_VittaCapital.pdf", page: 2, snippet: "…approximately 70% of total project cost…" },
+    confidence: 0.95, source: { doc: "Term_Sheet_Northbridge.pdf", page: 2, snippet: "…approximately 70% of total project cost…" },
     status: "ai-extracted", aliases: ["Leverage", "Debt-to-Cost"],
   },
   {
     id: "f10", field: "Interest Rate", category: "Financing", value: "Euribor 6M + 265 bps",
-    confidence: 0.92, source: { doc: "Term_Sheet_VittaCapital.pdf", page: 3, snippet: "…margin of 265 basis points over 6-month EURIBOR, floored at 0%…" },
+    confidence: 0.92, source: { doc: "Term_Sheet_Northbridge.pdf", page: 3, snippet: "…margin of 265 basis points over 6-month EURIBOR, floored at 0%…" },
     status: "human-confirmed", aliases: ["Margin", "Spread"],
   },
   {
     id: "f11", field: "Debt Tenor", category: "Financing", value: "17 years", numericValue: 17, unit: "yrs",
-    confidence: 0.96, source: { doc: "Term_Sheet_VittaCapital.pdf", page: 3, snippet: "…door-to-door tenor of 17 years from financial close…" },
+    confidence: 0.96, source: { doc: "Term_Sheet_Northbridge.pdf", page: 3, snippet: "…door-to-door tenor of 17 years from financial close…" },
     status: "human-confirmed", aliases: ["Loan Maturity", "Facility Term"],
   },
   {
     id: "f12", field: "Target DSCR (min)", category: "Financing", value: "1.30x", numericValue: 1.3, unit: "x",
-    confidence: 0.9, source: { doc: "Term_Sheet_VittaCapital.pdf", page: 4, snippet: "…lock-up at DSCR below 1.15x and default below 1.05x; target minimum 1.30x…" },
+    confidence: 0.9, source: { doc: "Term_Sheet_Northbridge.pdf", page: 4, snippet: "…lock-up at DSCR below 1.15x and default below 1.05x; target minimum 1.30x…" },
     status: "ai-extracted", aliases: ["Minimum DSCR", "Coverage Ratio"],
   },
   {
@@ -363,7 +363,7 @@ export const conflicts: Conflict[] = [
     id: "c2", field: "PPA Tariff", category: "Revenue", severity: "critical", status: "resolved",
     candidates: [
       { value: "€52.40 /MWh", source: "Helios_PPA_Executed_vFinal.pdf", page: 22, confidence: 0.88, snippet: "…EUR 52.40 per MWh, escalating at 1.8% p.a.…" },
-      { value: "€54.00 /MWh", source: "Term_Sheet_VittaCapital.pdf", page: 5, confidence: 0.81, snippet: "…minimum floor price of EUR 54.00/MWh for the facility sizing case…" },
+      { value: "€54.00 /MWh", source: "Term_Sheet_Northbridge.pdf", page: 5, confidence: 0.81, snippet: "…minimum floor price of EUR 54.00/MWh for the facility sizing case…" },
       { value: "€51.10 /MWh", source: "Financial_Model_v3.2.xlsx", page: 1, confidence: 0.77, snippet: "Inputs!D31 'Base tariff (real)' = 51.10" },
     ],
     resolution: { chosen: "€52.40 /MWh", by: "J. Moreau", at: "Jul 16, 15:40", note: "PPA contract is executed and governs. Term sheet floor is a sizing covenant, not a tariff. Model was pre-signing draft." },
@@ -409,7 +409,7 @@ export const risks: RiskItem[] = [
     description: "Executed PPA prices energy at €52.40/MWh while the lender term sheet assumes a €54.00/MWh floor for the sizing case. At the executed tariff, base-case DSCR compresses toward the 1.30x target in Years 3–5.",
     evidence: [
       { doc: "Helios_PPA_Executed_vFinal.pdf", page: 22, snippet: "…EUR 52.40 per MWh…" },
-      { doc: "Term_Sheet_VittaCapital.pdf", page: 5, snippet: "…minimum floor price of EUR 54.00/MWh…" },
+      { doc: "Term_Sheet_Northbridge.pdf", page: 5, snippet: "…minimum floor price of EUR 54.00/MWh…" },
     ],
     suggestedQuestions: ["Was the term sheet sized on the pre-signing tariff?", "Does the sponsor offer a revenue top-up guarantee?"],
   },
@@ -563,7 +563,7 @@ export const chatSample = [
     text: "Three stand out. First, the executed PPA tariff (€52.40/MWh) sits below the €54.00/MWh floor the term sheet was sized on, compressing DSCR in Years 3–5 [1][2]. Second, the O&M agreement is still a draft, so the €11.2k/MWp/yr cost is indicative [3]. Third, curtailment exposure is unquantified — the yield report assumes zero, but regional curtailment ran 2.1% in 2025 [4]. Want me to draft sponsor questions for each?",
     citations: [
       { n: 1, doc: "Helios_PPA_Executed_vFinal.pdf", page: 22 },
-      { n: 2, doc: "Term_Sheet_VittaCapital.pdf", page: 5 },
+      { n: 2, doc: "Term_Sheet_Northbridge.pdf", page: 5 },
       { n: 3, doc: "Om_Agreement_Draft.docx", page: 1 },
       { n: 4, doc: "Solar_Resource_Assessment_PVSyst.pdf", page: 41 },
     ],

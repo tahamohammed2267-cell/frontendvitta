@@ -46,7 +46,7 @@ export default function ExtractionTab() {
   return (
     <div className="space-y-4">
       {/* Stats strip */}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl border border-ink-200 bg-white px-5 py-3.5 text-[12.5px]">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg border border-ink-200 bg-white px-5 py-3.5 text-[12.5px]">
         <span className="text-ink-500"><span className="num font-semibold text-pos-700">{count("human-confirmed")}</span> confirmed</span>
         <span className="text-ink-500"><span className="num font-semibold text-accent-700">{count("ai-extracted")}</span> awaiting review</span>
         <span className="text-ink-500"><span className="num font-semibold text-ink-900">{count("overridden")}</span> overridden</span>
@@ -84,7 +84,7 @@ export default function ExtractionTab() {
               key={s}
               onClick={() => setStatus(s)}
               className={cn(
-                "rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition-colors",
+                "rounded-md border px-2.5 py-1 text-[11.5px] font-medium transition-colors",
                 status === s ? "border-ink-900 bg-ink-900 text-white" : "border-ink-200 bg-white text-ink-500 hover:border-ink-300"
               )}
             >

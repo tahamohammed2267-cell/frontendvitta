@@ -38,7 +38,7 @@ export default function DownloadsTab() {
               key={f}
               onClick={() => setFilter(f)}
               className={cn(
-                "rounded-full border px-2.5 py-1 text-[11.5px] font-medium transition-colors",
+                "rounded-md border px-2.5 py-1 text-[11.5px] font-medium transition-colors",
                 filter === f ? "border-ink-900 bg-ink-900 text-white" : "border-ink-200 bg-white text-ink-500 hover:border-ink-300"
               )}
             >

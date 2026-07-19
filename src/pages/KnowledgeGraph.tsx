@@ -8,19 +8,19 @@ type NodeType = "deal" | "company" | "contract" | "asset" | "risk";
 interface GNode { id: string; label: string; type: NodeType; x: number; y: number; facts: string[] }
 
 const typeColor: Record<NodeType, string> = {
-  deal: "#2563eb", company: "#12161f", contract: "#059669", asset: "#d97706", risk: "#dc2626",
+  deal: "#1d4ed8", company: "#12161f", contract: "#059669", asset: "#d97706", risk: "#dc2626",
 };
 
 const nodes: GNode[] = [
   { id: "helios", label: "Project Helios", type: "deal", x: 460, y: 260, facts: ["120 MWp Solar · Spain", "€96M deal size · In Diligence", "14 documents · 124 canonical fields"] },
   { id: "solarbond", label: "SolarBond (EPC)", type: "company", x: 220, y: 140, facts: ["EPC contractor on 2 firm deals", "Fixed lump-sum €96.4M on Helios", "No prior defaults in knowledge base"] },
-  { id: "vitta", label: "Vitta Capital", type: "company", x: 460, y: 70, facts: ["Senior lender · €67.5M facility", "Margin Euribor 6M + 265 bps", "Lender on 5 active deals"] },
+  { id: "vitta", label: "Northbridge Capital Partners", type: "company", x: 460, y: 70, facts: ["Senior lender · €67.5M facility", "Margin Euribor 6M + 265 bps", "Lender on 5 active deals"] },
   { id: "iberdrola", label: "Iberdrola (Offtaker)", type: "company", x: 720, y: 140, facts: ["Appears in 3 deals · 5 contracts", "Offtaker on Helios PPA (10y)", "Also offtaker on Solara One"] },
   { id: "site", label: "Andalusia Site", type: "asset", x: 240, y: 400, facts: ["312-hectare parcel", "Land lease 25y + 5y option", "220 kV Seville East substation · 105 MWac"] },
   { id: "ppa", label: "PPA (Executed)", type: "contract", x: 700, y: 300, facts: ["€52.40/MWh · 10 years", "Escalation 1.8% p.a.", "84 pages · 31 fields extracted"] },
   { id: "term", label: "Term Sheet", type: "contract", x: 460, y: 460, facts: ["€54.00/MWh sizing floor", "70% gearing · 17y tenor", "Lock-up DSCR 1.15x"] },
   { id: "solara", label: "Solara One", type: "deal", x: 880, y: 240, facts: ["Portfolio asset · €74M", "Shares offtaker Iberdrola", "EBITDA margin 78% · On Track"] },
-  { id: "nordwind", label: "Nordwind Park II", type: "deal", x: 620, y: 40, facts: ["Portfolio asset · €132M", "Shares lender Vitta Capital", "On Watch — below P50"] },
+  { id: "nordwind", label: "Nordwind Park II", type: "deal", x: 620, y: 40, facts: ["Portfolio asset · €132M", "Shares lender Northbridge Capital Partners", "On Watch — below P50"] },
   { id: "curtail", label: "Grid Curtailment", type: "risk", x: 120, y: 290, facts: ["Unquantified exposure", "Regional curtailment 2.1% in 2025", "High severity · open"] },
   { id: "lease", label: "Land Lease", type: "contract", x: 380, y: 520, facts: ["25y + 5y option", "€312,000 /yr", "Extension at lessor discretion — risk"] },
 ];
@@ -57,9 +57,9 @@ export default function KnowledgeGraph() {
         <p className="mt-0.5 text-[13px] text-ink-500">Companies, contracts, assets and risks — connected across every deal the firm has touched.</p>
       </div>
 
-      <div className="relative h-[calc(100vh-220px)] overflow-hidden rounded-xl border border-ink-200 bg-white fade-up">
+      <div className="relative h-[calc(100vh-220px)] overflow-hidden rounded-lg border border-ink-200 bg-white fade-up">
         {/* Legend */}
-        <div className="absolute left-4 top-4 z-10 rounded-xl border border-ink-200 bg-white/95 p-3 shadow-sm">
+        <div className="absolute left-4 top-4 z-10 rounded-lg border border-ink-200 bg-white/95 p-3 shadow-sm">
           <p className="mb-2 text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">Node types</p>
           {(Object.keys(typeColor) as NodeType[]).map((t) => (
             <p key={t} className="flex items-center gap-2 py-0.5 text-[12px] capitalize text-ink-700">
@@ -97,7 +97,7 @@ export default function KnowledgeGraph() {
           {/* nodes */}
           {nodes.map((n) => (
             <g key={n.id} onClick={() => setSelected(n)} className="cursor-pointer" opacity={dim(n) ? 0.15 : 1} style={{ transition: "opacity .2s" }}>
-              <circle cx={n.x} cy={n.y} r={n.type === "deal" ? 16 : 11} fill={typeColor[n.type]} opacity={selected?.id === n.id ? 1 : 0.92} stroke={selected?.id === n.id ? "#2563eb" : "white"} strokeWidth={selected?.id === n.id ? 4 : 2.5} />
+              <circle cx={n.x} cy={n.y} r={n.type === "deal" ? 16 : 11} fill={typeColor[n.type]} opacity={selected?.id === n.id ? 1 : 0.92} stroke={selected?.id === n.id ? "#0e5f45" : "white"} strokeWidth={selected?.id === n.id ? 4 : 2.5} />
               <text x={n.x} y={n.y + (n.type === "deal" ? 30 : 24)} textAnchor="middle" fontSize={11.5} fontWeight={600} fill="#12161f">{n.label}</text>
             </g>
           ))}

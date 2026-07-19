@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ArrowUpRight, FileUp, Plus, Sparkles, Sun, Wind, Building2, AlertTriangle } from "lucide-react";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { ArrowUpRight, FileUp, MessageSquareText, Plus, Sun, Wind, Building2, AlertTriangle } from "lucide-react";
 import { knowledgeGrowth, projects } from "../lib/mockData";
 import { Badge, Card, CardHeader, Stat } from "../lib/ui";
 import { cn } from "../lib/cn";
@@ -14,7 +14,7 @@ const activity = [
   { who: "R. Chen", what: "uploaded Environmental_Impact_Study.pdf", meta: "Extraction 64% complete", when: "2h ago", project: "Project Helios" },
   { who: "J. Moreau", what: "overrode PPA Tariff → €52.40/MWh", meta: "Reason logged", when: "Jul 16", project: "Project Helios" },
   { who: "A. Lindqvist", what: "generated IC Memo v2 (Word + PDF)", meta: "16 sections", when: "Jul 17", project: "Project Helios" },
-  { who: "Vitta AI", what: "flagged tariff below term-sheet floor", meta: "Critical risk", when: "Jul 16", project: "Project Helios" },
+  { who: "vitta", what: "flagged tariff below term-sheet floor", meta: "Critical risk", when: "Jul 16", project: "Project Helios" },
   { who: "S. Okafor", what: "created workspace Meridian Retail Park", meta: "Infrastructure · UK", when: "Jul 15", project: "Meridian" },
   { who: "M. Ferreira", what: "closed Atlas Student Living", meta: "Approved · €58M", when: "Jul 14", project: "Atlas" },
 ];
@@ -25,7 +25,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="mb-6 flex items-end justify-between fade-up">
         <div>
-          <h1 className="text-[24px] font-semibold tracking-tight">Good morning, Jane</h1>
+          <h1 className="text-[24px] font-semibold tracking-tight">Deals</h1>
           <p className="mt-1 text-[13px] text-ink-500">Friday, July 18 · 4 active deals · 3 documents still processing</p>
         </div>
         <div className="flex gap-2">
@@ -81,7 +81,7 @@ export default function Dashboard() {
                       <Progress label="Fields" pct={fieldPct} />
                     </div>
                     <div className="w-20 text-right">
-                      <p className="num text-[15px] font-semibold">€{p.dealSizeM}M</p>
+                      <p className="num text-[15px] font-semibold">€{p.dealSizeM}m</p>
                       {p.openConflicts > 0 && <p className="text-[11px] text-warn-700">{p.openConflicts} conflicts</p>}
                     </div>
                   </Link>
@@ -100,16 +100,11 @@ export default function Dashboard() {
             <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={knowledgeGrowth} margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>
-                  <defs>
-                    <linearGradient id="kg" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#2563eb" stopOpacity={0.22} />
-                      <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
+                  <CartesianGrid strokeDasharray="none" stroke="#f5f5f4" vertical={false} />
                   <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#8a93a6" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "#8a93a6" }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 10, border: "1px solid #dde1e9" }} />
-                  <Area type="monotone" dataKey="fields" stroke="#2563eb" strokeWidth={2} fill="url(#kg)" />
+                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #dde1e9" }} />
+                  <Area type="monotone" dataKey="fields" stroke="#0e5f45" strokeWidth={2} fill="#0e5f45" fillOpacity={0.08} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -119,9 +114,9 @@ export default function Dashboard() {
         {/* Right column */}
         <div className="space-y-4 fade-up">
           <Card>
-            <CardHeader title="Ask Vitta" sub="Across every deal, document and field" />
+            <CardHeader title="Ask vitta" sub="Across every deal, document and field" />
             <Link to="/search" className="flex items-center gap-2 rounded-lg border border-ink-200 bg-ink-50 px-3 py-2.5 text-[12.5px] text-ink-400 hover:border-ink-300">
-              <Sparkles size={14} className="text-accent-600" /> Compare Helios to past solar deals…
+              <MessageSquareText size={14} className="text-accent-600" /> Compare Helios to past solar deals…
             </Link>
             <div className="mt-3 space-y-1.5">
               {["Summarize open critical risks", "Draft sponsor questions for Helios"].map((q) => (
@@ -156,7 +151,7 @@ export default function Dashboard() {
               {activity.map((a, i) => (
                 <div key={i} className="flex gap-2.5">
                   <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink-100 text-[9.5px] font-semibold text-ink-600">
-                    {a.who === "Vitta AI" ? <AlertTriangle size={11} /> : a.who.split(" ").map((s) => s[0]).join("")}
+                    {a.who === "vitta" ? <AlertTriangle size={11} /> : a.who.split(" ").map((s) => s[0]).join("")}
                   </div>
                   <div className="min-w-0">
                     <p className="text-[12.5px] leading-snug text-ink-800">

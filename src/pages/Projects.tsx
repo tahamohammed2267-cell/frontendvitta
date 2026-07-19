@@ -108,7 +108,7 @@ function Row({ p, onClick }: { p: Project; onClick: () => void }) {
           {risk.critical + risk.high === 0 && <span className="text-[12px] text-pos-700">Clean</span>}
         </div>
       </td>
-      <td className="num px-4 py-3.5 text-right text-[13.5px] font-semibold">€{p.dealSizeM}M</td>
+      <td className="num px-4 py-3.5 text-right text-[13.5px] font-semibold">€{p.dealSizeM}m</td>
       <td className="px-5 py-3.5 text-right"><Badge tone={statusTone[p.status]}>{p.status}</Badge></td>
     </tr>
   );
@@ -128,7 +128,7 @@ function MiniBar({ done, total }: { done: number; total: number }) {
 
 function Dot({ c, n }: { c: string; n: number }) {
   return (
-    <span className="flex items-center gap-1 rounded-full bg-ink-50 px-1.5 py-0.5">
+    <span className="flex items-center gap-1 rounded-md bg-ink-50 px-1.5 py-0.5">
       <span className={cn("h-1.5 w-1.5 rounded-full", c)} />
       <span className="num text-[11px] font-medium text-ink-600">{n}</span>
     </span>

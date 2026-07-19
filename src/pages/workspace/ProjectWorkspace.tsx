@@ -1,5 +1,5 @@
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Share2, Sparkles } from "lucide-react";
+import { ArrowLeft, Play, Share2 } from "lucide-react";
 import { checklist, conflicts, documents, projects } from "../../lib/mockData";
 import { Badge, Button } from "../../lib/ui";
 import { cn } from "../../lib/cn";
@@ -49,14 +49,14 @@ export default function ProjectWorkspace() {
                 <span>{project.country}</span>
                 {project.capacityMW && (<><span className="text-ink-300">·</span><span className="num">{project.capacityMW} MW</span></>)}
                 <span className="text-ink-300">·</span>
-                <span className="num">€{project.dealSizeM}M</span>
+                <span className="num">€{project.dealSizeM}m</span>
                 <span className="text-ink-300">·</span>
                 <span>Stage: {project.stage}</span>
               </div>
             </div>
             <div className="flex gap-2">
               <Button variant="secondary"><Share2 size={14} /> Share</Button>
-              <Button onClick={() => setParams({ tab: "outputs" })}><Sparkles size={14} /> Generate Output</Button>
+              <Button onClick={() => setParams({ tab: "outputs" })}><Play size={14} /> Generate Output</Button>
             </div>
           </div>
 
@@ -74,7 +74,7 @@ export default function ProjectWorkspace() {
                 {t.label}
                 {t.count !== undefined && (
                   <span className={cn(
-                    "num rounded-full px-1.5 py-0.5 text-[10.5px] font-semibold",
+                    "num rounded-md px-1.5 py-0.5 text-[10.5px] font-semibold",
                     t.warn && t.count > 0 ? "bg-warn-100 text-warn-700" : "bg-ink-100 text-ink-500"
                   )}>
                     {t.count}

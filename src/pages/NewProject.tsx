@@ -81,7 +81,7 @@ export default function NewProject() {
                     key={o.t}
                     onClick={() => { setTech(o.t); setSub(null); }}
                     className={cn(
-                      "rounded-xl border p-4 text-left transition-all",
+                      "rounded-lg border p-4 text-left transition-all",
                       tech === o.t ? "border-accent-600 bg-accent-50 shadow-[0_0_0_3px_rgba(37,99,235,0.1)]" : "border-ink-200 bg-white hover:border-ink-300"
                     )}
                   >
@@ -100,7 +100,7 @@ export default function NewProject() {
                         key={t}
                         onClick={() => setSub(t)}
                         className={cn(
-                          "rounded-xl border px-4 py-3 text-left text-[13px] font-medium transition-all",
+                          "rounded-lg border px-4 py-3 text-left text-[13px] font-medium transition-all",
                           sub === t ? "border-accent-600 bg-accent-50 text-accent-700" : "border-ink-200 bg-white hover:border-ink-300"
                         )}
                       >

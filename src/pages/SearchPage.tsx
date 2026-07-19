@@ -12,7 +12,7 @@ const results = [
   {
     type: "Risk", title: "PPA tariff below term sheet floor", to: "/projects/helios?tab=intelligence",
     snippet: <>Executed PPA prices energy at <mark className="rounded bg-warn-100 px-0.5">€52.40/MWh</mark> while the lender term sheet assumes a €54.00/MWh floor…</>,
-    src: "Term_Sheet_VittaCapital.pdf", page: 5,
+    src: "Term_Sheet_Northbridge.pdf", page: 5,
   },
   {
     type: "Deal", title: "Project Helios — 120 MWp Solar, Spain", to: "/projects/helios",
@@ -45,7 +45,7 @@ export default function SearchPage() {
     <div className="mx-auto max-w-[1100px] px-6 py-8">
       {/* Hero */}
       <div className="mx-auto mb-8 max-w-[720px] fade-up">
-        <div className="flex items-center gap-3 rounded-2xl border border-ink-200 bg-white px-4 py-3.5 shadow-[0_2px_8px_rgba(11,14,20,0.05)] focus-within:border-accent-500 focus-within:ring-4 focus-within:ring-accent-600/10">
+        <div className="flex items-center gap-3 rounded-lg border border-ink-200 bg-white px-4 py-3.5 shadow-[0_2px_8px_rgba(11,14,20,0.05)] focus-within:border-accent-500 focus-within:ring-4 focus-within:ring-accent-600/10">
           <Search size={17} className="shrink-0 text-ink-400" />
           <input
             defaultValue="every solar deal with PPA tariff below €55/MWh"
@@ -55,7 +55,7 @@ export default function SearchPage() {
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {["Show every contract longer than five years", ...suggestedPrompts.slice(1, 4)].map((q) => (
-            <button key={q} className="rounded-full border border-ink-200 bg-white px-3 py-1.5 text-[11.5px] text-ink-600 hover:border-accent-500 hover:text-accent-700">{q}</button>
+            <button key={q} className="rounded-md border border-ink-200 bg-white px-3 py-1.5 text-[11.5px] text-ink-600 hover:border-accent-500 hover:text-accent-700">{q}</button>
           ))}
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, FolderKanban, Sparkles, Briefcase, Search, Network,
+  LayoutDashboard, FolderKanban, Lightbulb, Briefcase, Search, Network,
   Settings, Plus, PanelRightClose, PanelRightOpen, Command,
 } from "lucide-react";
 import { useState } from "react";
@@ -11,7 +11,7 @@ import ChatPanel from "../components/ChatPanel";
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/projects", label: "Deals", icon: FolderKanban },
-  { to: "/intelligence", label: "Intelligence", icon: Sparkles },
+  { to: "/intelligence", label: "Intelligence", icon: Lightbulb },
   { to: "/portfolio", label: "Portfolio", icon: Briefcase },
   { to: "/graph", label: "Knowledge Graph", icon: Network },
 ];
@@ -25,10 +25,8 @@ export default function Layout() {
     <div className="flex h-screen overflow-hidden bg-ink-50">
       {/* ── Left sidebar ─────────────────────────────── */}
       <aside className="flex w-[216px] shrink-0 flex-col border-r border-ink-200 bg-white">
-        <div className="flex h-14 items-center gap-2.5 border-b border-ink-100 px-4">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink-900 text-[13px] font-bold text-white">V</div>
-          <span className="text-[15px] font-semibold tracking-tight">Vitta</span>
-          <span className="ml-auto rounded border border-ink-200 px-1.5 py-0.5 text-[10px] font-medium text-ink-400">BETA</span>
+        <div className="flex h-14 items-center border-b border-ink-100 px-4">
+          <span className="text-[16px] font-semibold text-ink-900" style={{ letterSpacing: "-0.02em" }}>vitta</span>
         </div>
 
         {/* Search */}
@@ -95,7 +93,7 @@ export default function Layout() {
               )}
             >
               {aiOpen ? <PanelRightClose size={14} /> : <PanelRightOpen size={14} />}
-              Vitta AI
+              Ask vitta
             </button>
           </div>
         </header>

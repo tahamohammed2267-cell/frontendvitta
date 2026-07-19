@@ -21,8 +21,8 @@ const blueprintRows: { cell: string; field: string; value: string; state: "popul
   { cell: "Revenue!C11", field: "PPA Tariff (Year 1)", value: "€52.40 /MWh", state: "populated", src: "Helios_PPA_Executed_vFinal.pdf", page: 22 },
   { cell: "Revenue!C12", field: "Escalation", value: "1.8% p.a.", state: "populated", src: "Helios_PPA_Executed_vFinal.pdf", page: 22 },
   { cell: "Revenue!C38", field: "Merchant Tail Price", value: "", state: "missing" },
-  { cell: "Debt!C5", field: "Senior Facility", value: "€67.5M", state: "populated", src: "Term_Sheet_VittaCapital.pdf", page: 2 },
-  { cell: "Debt!C9", field: "Margin", value: "Euribor 6M + 265 bps", state: "populated", src: "Term_Sheet_VittaCapital.pdf", page: 3 },
+  { cell: "Debt!C5", field: "Senior Facility", value: "€67.5M", state: "populated", src: "Term_Sheet_Northbridge.pdf", page: 2 },
+  { cell: "Debt!C9", field: "Margin", value: "Euribor 6M + 265 bps", state: "populated", src: "Term_Sheet_Northbridge.pdf", page: 3 },
   { cell: "Outputs!C12", field: "Project IRR", value: "8.4%", state: "computed", src: "Financial_Model_v3.2.xlsx" },
   { cell: "Outputs!C14", field: "Equity IRR", value: "11.8%", state: "computed", src: "Financial_Model_v3.2.xlsx" },
   { cell: "Funding!C7", field: "Sponsor Equity", value: "", state: "missing" },
@@ -35,7 +35,7 @@ export default function OutputsTab() {
       {/* Computed workbook banner */}
       <Card className="border-accent-100 bg-accent-50/60">
         <div className="flex items-center gap-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-accent-600"><FileSpreadsheet size={18} /></div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-accent-600"><FileSpreadsheet size={18} /></div>
           <div className="min-w-0 flex-1">
             <p className="text-[13.5px] font-semibold">Computed workbook on file</p>
             <p className="mt-0.5 text-[12px] text-ink-600">
@@ -137,7 +137,7 @@ function MemoPreview() {
         <section>
           <h4 className="text-[17px] font-semibold tracking-tight">1. Executive Summary</h4>
           <p className="mt-2 text-[13px] leading-relaxed text-ink-700">
-            Vitta Capital is asked to provide a €67.5M senior secured facility (70% gearing, 17-year door-to-door) to Project Helios, a 120 MWp
+            Northbridge Capital Partners is asked to provide a €67.5M senior secured facility (70% gearing, 17-year door-to-door) to Project Helios, a 120 MWp
             solar PV asset in Andalusia, Spain. The project benefits from an executed 10-year PPA at €52.40/MWh with 1.8% annual escalation, a
             fixed-price EPC contract at €96.4M, and a strong resource profile (P50 1,812 kWh/kWp). Base-case levered equity IRR is 11.8% with a
             minimum DSCR of 1.30x.
@@ -198,7 +198,7 @@ function DeckPreview() {
             <div className="mt-1 h-[calc(100%-30px)]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={revenueProjection} margin={{ top: 2, right: 2, bottom: 2, left: 2 }}>
-                  <Line type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={1.5} dot={false} />
+                  <Line type="monotone" dataKey="revenue" stroke="#0e5f45" strokeWidth={1.5} dot={false} />
                   <Line type="monotone" dataKey="cfads" stroke="#059669" strokeWidth={1.5} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
