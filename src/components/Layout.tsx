@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { cn } from "../lib/cn";
 import { useStore } from "../lib/store";
 import { getActiveTimeline } from "../lib/timeline";
+import { portfolioLabelLookup } from "../lib/portfolioData";
 import ChatPanel from "../components/ChatPanel";
 import SourceDrawer from "../components/SourceDrawer";
 import Toast from "../components/Toast";
@@ -165,6 +166,7 @@ function Breadcrumbs({ pathname }: { pathname: string }) {
   const labels: Record<string, string> = {
     projects: "Deals", intelligence: "Intelligence", portfolio: "Portfolio", search: "Search", graph: "Knowledge Graph",
     helios: "Project Helios", boreas: "Project Boreas", meridian: "Meridian Retail Park", atlas: "Atlas Student Living", zephyr: "Project Zephyr", new: "New Deal",
+    solar: "Solar", wind: "Wind", infrastructure: "Infrastructure", health: "Health Center", dashboards: "Dashboards", edit: "Edit",
   };
   if (parts.length === 0) return <span className="text-[14px] font-semibold tracking-tight">Dashboard</span>;
   return (
@@ -172,7 +174,7 @@ function Breadcrumbs({ pathname }: { pathname: string }) {
       {parts.map((p, i) => (
         <span key={i} className="flex items-center gap-1.5">
           {i > 0 && <span className="text-ink-300">/</span>}
-          <span className={i === parts.length - 1 ? "font-semibold text-ink-900" : "text-ink-400"}>{labels[p] ?? p}</span>
+          <span className={i === parts.length - 1 ? "font-semibold text-ink-900" : "text-ink-400"}>{labels[p] ?? portfolioLabelLookup(p) ?? p}</span>
         </span>
       ))}
     </div>

@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { useEffect } from "react";
+import { X } from "lucide-react";
 import { cn } from "./cn";
 import { useStore } from "./store";
 
@@ -162,5 +164,102 @@ export function SourceChip({
       <span className="truncate font-medium">{doc}</span>
       {page > 0 && <span className="num shrink-0 text-ink-400">p.{page}</span>}
     </button>
+  );
+}
+
+// ── Modal / Drawer ──────────────────────────────────────────
+
+export function Modal({
+  open, onClose, title, sub, children, width = "560px",
+}: { open: boolean; onClose: () => void; title: string; sub?: string; children: ReactNode; width?: string }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/40 p-6 fade-up" onClick={onClose}>
+      <div
+        className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-lg border border-ink-200 bg-white shadow-[0_20px_60px_rgba(11,14,20,0.25)]"
+        style={{ maxWidth: width }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex shrink-0 items-start justify-between border-b border-ink-100 px-5 py-4">
+          <div>
+            <h3 className="text-[15px] font-semibold tracking-tight text-ink-900">{title}</h3>
+            {sub && <p className="mt-0.5 text-[12.5px] text-ink-500">{sub}</p>}
+          </div>
+          <button onClick={onClose} className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-700"><X size={16} /></button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+export function Drawer({
+  open, onClose, title, sub, children, width = "440px",
+}: { open: boolean; onClose: () => void; title: string; sub?: string; children: ReactNode; width?: string }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-ink-950/40" onClick={onClose}>
+      <div
+        className="fade-up flex h-full flex-col overflow-hidden border-l border-ink-200 bg-white shadow-[0_0_40px_rgba(11,14,20,0.15)]"
+        style={{ width }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex shrink-0 items-start justify-between border-b border-ink-100 px-5 py-4">
+          <div>
+            <h3 className="text-[15px] font-semibold tracking-tight text-ink-900">{title}</h3>
+            {sub && <p className="mt-0.5 text-[12.5px] text-ink-500">{sub}</p>}
+          </div>
+          <button onClick={onClose} className="rounded-md p-1.5 text-ink-400 hover:bg-ink-100 hover:text-ink-700"><X size={16} /></button>
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+// ── Gauge ───────────────────────────────────────────────────
+
+export function Gauge({ value, max = 100, target, label, unit = "%" }: { value: number; max?: number; target?: number; label?: string; unit?: string }) {
+  const pct = Math.max(0, Math.min(1, value / max));
+  const r = 42;
+  const circumference = Math.PI * r; // semicircle
+  const offset = circumference * (1 - pct);
+  const color = pct >= 0.9 ? "#059669" : pct >= 0.7 ? "#0e5f45" : pct >= 0.5 ? "#d97706" : "#dc2626";
+  const targetPct = target !== undefined ? Math.max(0, Math.min(1, target / max)) : undefined;
+  const targetAngle = targetPct !== undefined ? Math.PI * (1 - targetPct) : undefined;
+  const targetX = targetAngle !== undefined ? 50 + r * Math.cos(targetAngle) : undefined;
+  const targetY = targetAngle !== undefined ? 50 - r * Math.sin(targetAngle) : undefined;
+
+  return (
+    <div className="flex flex-col items-center">
+      <svg viewBox="0 0 100 58" className="w-full max-w-[160px]">
+        <path d={`M 8 50 A ${r} ${r} 0 0 1 92 50`} fill="none" stroke="#eceef3" strokeWidth={8} strokeLinecap="round" />
+        <path
+          d={`M 8 50 A ${r} ${r} 0 0 1 92 50`}
+          fill="none" stroke={color} strokeWidth={8} strokeLinecap="round"
+          strokeDasharray={circumference} strokeDashoffset={offset}
+          style={{ transition: "stroke-dashoffset .4s ease" }}
+        />
+        {targetX !== undefined && targetY !== undefined && (
+          <line x1={targetX} y1={targetY - 5} x2={targetX} y2={targetY + 5} stroke="#12161f" strokeWidth={2} />
+        )}
+      </svg>
+      <p className="num -mt-2 text-[20px] font-semibold tracking-tight text-ink-900">{value}{unit}</p>
+      {label && <p className="mt-0.5 text-[11px] text-ink-500">{label}</p>}
+    </div>
   );
 }
