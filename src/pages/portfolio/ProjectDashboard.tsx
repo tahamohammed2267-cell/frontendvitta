@@ -10,6 +10,7 @@ import { cn } from "../../lib/cn";
 import InsightsPanel from "./insights/InsightsPanel";
 import MISUploadFlow from "./mis/MISUploadFlow";
 import AuditTrailPanel from "./mis/AuditTrailPanel";
+import CustomDashboardsSection from "./builder/CustomDashboardsSection";
 
 const docIcon: Record<ProjectDocument["kind"], typeof FileText> = {
   MIS: FileSpreadsheet, "Financial Statement": FileText, Contract: Gavel, "EPC Report": ImageIcon,
@@ -161,6 +162,8 @@ export default function ProjectDashboard() {
               </div>
             )}
           </Card>
+
+          <CustomDashboardsSection scope="project" scopeId={proj.id} />
         </div>
 
         <div className="space-y-4 fade-up">

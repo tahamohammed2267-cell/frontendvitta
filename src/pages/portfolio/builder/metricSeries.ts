@@ -1,6 +1,6 @@
 import {
   aggregateKPIs, findProject, findRegion, portfolioProjects, projectsForIndustry, projectsForRegion,
-  type ComparisonKey, type DashboardScope, type MetricKey, type TimeRange,
+  type ComparisonKey, type DashboardScope, type MetricKey, type PortfolioProject, type TimeRange,
 } from "../../../lib/portfolioData";
 
 export interface SeriesPoint { label: string; value: number }
@@ -60,10 +60,44 @@ export function getComparisonValue(metric: MetricKey, scope: DashboardScope, sco
   return Math.round(getMetricValue(metric, scope, scopeId) * comparisonFactor[comparison] * 10) / 10;
 }
 
+// Deterministic pseudo-random trend seeded by a string key, anchored so the
+// final point lands exactly on `target` — every metric gets a plausible,
+// non-flat month-over-month shape without being literally random per render.
+function seededTrend(seedKey: string, points: number, target: number, volatility: number): number[] {
+  let seed = 0;
+  for (let i = 0; i < seedKey.length; i++) seed = (seed * 31 + seedKey.charCodeAt(i)) >>> 0;
+  function rand() {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+  }
+  const raw: number[] = [];
+  let v = 1;
+  for (let i = 0; i < points; i++) {
+    v += (rand() - 0.5) * volatility * 2;
+    raw.push(Math.max(v, 0.1));
+  }
+  const last = raw[raw.length - 1] || 1;
+  return raw.map((r) => Math.round(target * (r / last) * 100) / 100);
+}
+
+const lowVolatilityMetrics = new Set<MetricKey>(["ebitdaMargin", "assetHealth", "panelEfficiency", "availability", "capacityUtilization"]);
+
+function projectMonthlySeries(metric: MetricKey, project: PortfolioProject): SeriesPoint[] {
+  const months = project.financials.topline.byMonth;
+  if (metric === "revenue") return months.map((m) => ({ label: m.month, value: m.revenueM }));
+  if (metric === "ebitda") {
+    return months.map((m) => ({ label: m.month, value: Math.round(m.revenueM * (project.financials.earnings.marginPct / 100) * 10) / 10 }));
+  }
+  const target = metricValueFor(metric, [project]);
+  const volatility = lowVolatilityMetrics.has(metric) ? 0.03 : 0.09;
+  const values = seededTrend(`${project.id}:${metric}`, months.length, target, volatility);
+  return months.map((m, i) => ({ label: m.month, value: values[i] }));
+}
+
 export function getMetricSeries(metric: MetricKey, scope: DashboardScope, scopeId: string, _timeRange: TimeRange): SeriesPoint[] {
   const projects = scopedProjects(scope, scopeId);
   if (scope === "project" && projects[0]) {
-    return projects[0].financials.topline.byMonth.map((m) => ({ label: m.month, value: metricKeyFromMonth(metric, m.revenueM, projects[0]) }));
+    return projectMonthlySeries(metric, projects[0]);
   }
   // group by region within scope for bar/pie/table/heatmap widgets
   const regionIds = [...new Set(projects.map((p) => p.regionId))];
@@ -74,20 +108,16 @@ export function getMetricSeries(metric: MetricKey, scope: DashboardScope, scopeI
   });
 }
 
-function metricKeyFromMonth(metric: MetricKey, revenueM: number, project: ReturnType<typeof scopedProjects>[number]) {
-  if (metric === "revenue") return revenueM;
-  if (metric === "ebitda") return Math.round(revenueM * (project.financials.earnings.marginPct / 100) * 10) / 10;
-  return revenueM;
-}
-
-export function getTableRows(scope: DashboardScope, scopeId: string) {
+export function getTableRows(scope: DashboardScope, scopeId: string, metric: MetricKey) {
   return scopedProjects(scope, scopeId).map((p) => ({
-    name: p.name, revenue: p.financials.topline.revenueM, ebitda: p.financials.earnings.ebitdaM,
-    health: p.assetHealth.score, status: p.status,
+    name: p.name,
+    metricValue: metricValueFor(metric, [p]),
+    health: p.assetHealth.score,
+    status: p.status,
   }));
 }
 
-export function getHeatmapData(scope: DashboardScope, scopeId: string) {
+export function getHeatmapData(scope: DashboardScope, scopeId: string, metric: MetricKey) {
   const projects = scopedProjects(scope, scopeId);
-  return projects.map((p) => ({ row: p.name, col: "Asset Health", value: p.assetHealth.score }));
+  return projects.map((p) => ({ row: p.name, col: metricLabels[metric], value: metricValueFor(metric, [p]) }));
 }

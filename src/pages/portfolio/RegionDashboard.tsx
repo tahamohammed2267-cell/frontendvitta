@@ -7,6 +7,7 @@ import {
 } from "../../lib/portfolioData";
 import { Badge, Card, CardHeader, EmptyState, SeverityBadge, Stat } from "../../lib/ui";
 import InsightsPanel from "./insights/InsightsPanel";
+import CustomDashboardsSection from "./builder/CustomDashboardsSection";
 
 const statusColor: Record<string, string> = {
   Operational: "#059669", "Ramp-up": "#1d4ed8", "Under Construction": "#8a93a6", Watch: "#d97706", "At Risk": "#dc2626",
@@ -129,6 +130,8 @@ export default function RegionDashboard() {
               })}
             </div>
           </Card>
+
+          <CustomDashboardsSection scope="region" scopeId={reg.id} />
         </div>
 
         <div className="space-y-4 fade-up">

@@ -2,7 +2,7 @@ import {
   Area, AreaChart, Bar, BarChart, Cell, Line, LineChart, Pie, PieChart,
   ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis,
 } from "recharts";
-import type { WidgetConfig, DashboardScope } from "../../../lib/portfolioData";
+import type { WidgetConfig, DashboardScope, MetricKey } from "../../../lib/portfolioData";
 import { Stat } from "../../../lib/ui";
 import HeatmapGrid from "../widgets/HeatmapGrid";
 import WaterfallChart from "../widgets/WaterfallChart";
@@ -11,6 +11,7 @@ import GaugeWidget from "../widgets/GaugeWidget";
 import { getComparisonValue, getHeatmapData, getMetricSeries, getMetricValue, getTableRows, metricLabels, metricUnits } from "./metricSeries";
 
 const palette = ["#0e5f45", "#1d4ed8", "#b45309", "#7c3aed", "#475569"];
+const inverseMetrics = new Set<MetricKey>(["maintenanceCost", "opex", "capex", "debtService"]);
 
 function formatMetric(value: number, unit: string) {
   if (unit === "€M") return `${value < 0 ? "-" : ""}€${Math.abs(value).toLocaleString()}m`;
@@ -101,21 +102,20 @@ export default function WidgetRenderer({ config, scope, scopeId }: { config: Wid
       );
     }
     case "table": {
-      const rows = getTableRows(scope, scopeId);
+      const rows = getTableRows(scope, scopeId, config.metric);
       return (
         <div className="h-full overflow-y-auto">
           <table className="w-full text-left text-[11.5px]">
             <thead>
               <tr className="border-b border-ink-100 text-[10px] font-semibold uppercase tracking-wide text-ink-400">
-                <th className="py-1.5 pr-2">Project</th><th className="py-1.5 pr-2">Revenue</th><th className="py-1.5 pr-2">EBITDA</th><th className="py-1.5">Health</th>
+                <th className="py-1.5 pr-2">Project</th><th className="py-1.5 pr-2">{label}</th><th className="py-1.5">Health</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-ink-100">
               {rows.map((r) => (
                 <tr key={r.name}>
                   <td className="truncate py-1.5 pr-2 font-medium">{r.name}</td>
-                  <td className="num py-1.5 pr-2">€{r.revenue}m</td>
-                  <td className="num py-1.5 pr-2">€{r.ebitda}m</td>
+                  <td className="num py-1.5 pr-2">{formatMetric(r.metricValue, unit)}</td>
                   <td className="num py-1.5">{r.health}</td>
                 </tr>
               ))}
@@ -125,9 +125,9 @@ export default function WidgetRenderer({ config, scope, scopeId }: { config: Wid
       );
     }
     case "heatmap": {
-      const cells = getHeatmapData(scope, scopeId);
+      const cells = getHeatmapData(scope, scopeId, config.metric);
       const rows = [...new Set(cells.map((c) => c.row))];
-      return <HeatmapGrid cells={cells} rows={rows} cols={["Asset Health"]} />;
+      return <HeatmapGrid cells={cells} rows={rows} cols={[label]} unit={unit} invert={inverseMetrics.has(config.metric)} />;
     }
     case "waterfall": {
       const series = getMetricSeries(config.metric, scope, scopeId, config.timeRange);
