@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Building2, Check, FileSpreadsheet, Sun, Wind } from "lucide-react";
 import { Badge, Button, Card, CardHeader, SectionLabel } from "../lib/ui";
+import { useStore } from "../lib/store";
 import { cn } from "../lib/cn";
 
 type Tech = "Solar" | "Wind" | "Infrastructure" | null;
@@ -39,6 +40,12 @@ export default function NewProject() {
   const [capacity, setCapacity] = useState("");
   const [size, setSize] = useState("");
   const navigate = useNavigate();
+  const startNewDeal = useStore((s) => s.startNewDeal);
+
+  function createWorkspace() {
+    startNewDeal(name || "Project Helios");
+    navigate("/projects/helios?tab=documents");
+  }
 
   const key = tech === "Infrastructure" ? sub : tech;
   const bp = key ? blueprints[key] : null;
@@ -171,7 +178,7 @@ export default function NewProject() {
                 Continue <ArrowRight size={15} />
               </Button>
             ) : (
-              <Button onClick={() => navigate("/projects/helios")}>Create workspace <ArrowRight size={15} /></Button>
+              <Button onClick={createWorkspace}>Create workspace <ArrowRight size={15} /></Button>
             )}
           </div>
         </div>
@@ -186,7 +193,7 @@ export default function NewProject() {
               <SummaryRow k="Name" v={name || "—"} />
               <SummaryRow k="Country" v={step >= 2 ? country : "—"} />
               {tech !== "Infrastructure" && <SummaryRow k="Capacity" v={capacity ? `${capacity} MW` : "—"} />}
-              <SummaryRow k="Deal size" v={size ? `€${size}M` : "—"} />
+              <SummaryRow k="Deal size" v={size ? `€${size}m` : "—"} />
               <SummaryRow k="Blueprint" v={bp?.name ?? "—"} accent />
             </dl>
           </Card>

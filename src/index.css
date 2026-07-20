@@ -109,3 +109,120 @@ body {
     background-position: -200% 0;
   }
 }
+
+/* Skeleton / shimmer loading block */
+.skeleton {
+  background: linear-gradient(
+    100deg,
+    var(--color-ink-100) 30%,
+    var(--color-ink-50) 50%,
+    var(--color-ink-100) 70%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+/* Staggered reveal — set --i on children (0,1,2…) to cascade fade-ups */
+.stagger > * {
+  animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+
+/* Card lift on hover — subtle depth without feeling boxy */
+.lift {
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.22s ease;
+}
+.lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px -8px rgba(11, 14, 20, 0.14);
+}
+
+/* Moving sheen across a progress bar while a job runs */
+@keyframes progressSheen {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}
+.progress-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.55),
+    transparent
+  );
+  animation: progressSheen 1.5s ease-in-out infinite;
+}
+
+/* Concentric expanding ring — for "live"/processing indicators */
+@keyframes ripple {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.ripple::before,
+.ripple::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: ripple 1.8s ease-out infinite;
+}
+.ripple::after {
+  animation-delay: 0.9s;
+}
+
+/* Slide up from below — for docked panels */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Gentle vertical bob — for a "working" glyph */
+@keyframes floaty {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+.floaty {
+  animation: floaty 2.4s ease-in-out infinite;
+}
+
+/* Count-up flash when a number changes */
+@keyframes tickFlash {
+  0% {
+    color: var(--color-accent-600);
+  }
+  100% {
+    color: inherit;
+  }
+}
+.tick-flash {
+  animation: tickFlash 0.5s ease-out;
+}

@@ -106,20 +106,32 @@ export default function DocumentsTab() {
 
 function PipelinePanel({ stageIndex, counters }: { stageIndex: number; counters: { fields: number; tables: number } }) {
   const stage = PIPELINE_STAGES[stageIndex];
+  const total = PIPELINE_STAGES.length - 1;
+  const pct = Math.round((stageIndex / total) * 100);
   return (
     <Card className="fade-up">
-      <div className="mb-5 flex items-center gap-2.5">
-        <Loader2 size={16} className="animate-spin text-accent-600" />
+      <div className="mb-4 flex items-center gap-2.5">
+        <span className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-accent-50 text-accent-600">
+          <span className="ripple absolute inset-0 rounded-lg text-accent-500/30" />
+          <Loader2 size={15} className="relative animate-spin" />
+        </span>
         <p className="text-[15px] font-semibold tracking-tight">Running extraction pipeline</p>
-        <Badge tone="blue" className="ml-1">Live</Badge>
+        <Badge tone="blue" className="ml-1"><span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-accent-600 pulse-soft" />Live</Badge>
+        <span className="num ml-auto text-[13px] font-semibold text-ink-500">{pct}%</span>
       </div>
+
+      {/* overall progress bar with moving sheen */}
+      <div className="relative mb-5 h-1.5 overflow-hidden rounded-full bg-ink-100">
+        <div className="progress-sheen relative h-full rounded-full bg-accent-600 transition-[width] duration-500 ease-out" style={{ width: `${pct}%` }} />
+      </div>
+
       <div className="grid grid-cols-[240px_1fr] gap-8">
         <div className="space-y-1">
-          {PIPELINE_STAGES.map((s, i) => (
+          {PIPELINE_STAGES.slice(0, -1).map((s, i) => (
             <div
               key={s.label}
               className={cn(
-                "flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium",
+                "flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors",
                 i < stageIndex ? "text-pos-700" : i === stageIndex ? "bg-accent-50 text-accent-700" : "text-ink-400"
               )}
             >
@@ -136,17 +148,21 @@ function PipelinePanel({ stageIndex, counters }: { stageIndex: number; counters:
         </div>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-lg border border-ink-100 p-4">
+            <div className="rounded-lg border border-ink-100 bg-ink-50/40 p-4">
               <p className="text-[11.5px] font-medium text-ink-500">Fields discovered</p>
-              <p className="num mt-1 text-[28px] font-semibold tracking-tight">{counters.fields}</p>
+              <p key={counters.fields} className="num tick-flash mt-1 text-[28px] font-semibold tracking-tight">{counters.fields}</p>
             </div>
-            <div className="rounded-lg border border-ink-100 p-4">
+            <div className="rounded-lg border border-ink-100 bg-ink-50/40 p-4">
               <p className="text-[11.5px] font-medium text-ink-500">Tables detected</p>
-              <p className="num mt-1 text-[28px] font-semibold tracking-tight">{counters.tables}</p>
+              <p key={counters.tables} className="num tick-flash mt-1 text-[28px] font-semibold tracking-tight">{counters.tables}</p>
             </div>
           </div>
+          <div className="rounded-lg border border-accent-100 bg-accent-50/50 px-4 py-3">
+            <p className="text-[12.5px] font-medium text-accent-800">{stage.label}…</p>
+            <p className="mt-0.5 text-[12px] leading-relaxed text-ink-600">{stage.detail}</p>
+          </div>
           <p className="text-[12px] leading-relaxed text-ink-500">
-            {stage.label}… running automatically across every uploaded document — press <span className="rounded border border-ink-200 bg-ink-50 px-1 font-mono text-[11px]">→</span> to skip ahead a stage or <span className="rounded border border-ink-200 bg-ink-50 px-1 font-mono text-[11px]">⇧→</span> to finish the run now.
+            Running automatically across every uploaded document — press <span className="rounded border border-ink-200 bg-ink-50 px-1 font-mono text-[11px]">→</span> to skip a stage or <span className="rounded border border-ink-200 bg-ink-50 px-1 font-mono text-[11px]">⇧→</span> to finish now. You can leave this screen — progress keeps running in the corner.
           </p>
         </div>
       </div>

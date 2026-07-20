@@ -37,14 +37,16 @@ export interface ChatMessage {
 export type HeliosStage = "pre-upload" | "uploading" | "running" | "done";
 
 export const PIPELINE_STAGES = [
-  { label: "Parsing", durationMs: 18000 },
-  { label: "Classifying", durationMs: 10000 },
-  { label: "Extracting", durationMs: 42000 },
-  { label: "Mapping to canonical schema", durationMs: 8000 },
-  { label: "Validating", durationMs: 12000 },
-  { label: "Detecting conflicts", durationMs: 6000 },
-  { label: "Done", durationMs: 4000 },
+  { label: "Parsing", detail: "Reading document structure, splitting pages, running layout analysis", durationMs: 9000 },
+  { label: "Classifying", detail: "Matching each document to the blueprint taxonomy", durationMs: 6000 },
+  { label: "Extracting", detail: "Pulling fields, tables and figures with OCR fallback on scans", durationMs: 22000 },
+  { label: "Mapping to canonical schema", detail: "Normalising units and aligning to the canonical data model", durationMs: 5000 },
+  { label: "Validating", detail: "Cross-checking values, ranges and internal consistency", durationMs: 7000 },
+  { label: "Detecting conflicts", detail: "Flagging disagreements between source documents", durationMs: 5000 },
+  { label: "Done", detail: "Extraction complete", durationMs: 2000 },
 ] as const;
+
+export type PipelineDock = "hidden" | "running" | "done";
 
 const TOTAL_TABLES = 12;
 
@@ -113,6 +115,10 @@ interface Store extends Data {
   heliosStage: HeliosStage;
   pipelineStageIndex: number;
   pipelineCounters: { fields: number; tables: number };
+  pipelineDock: PipelineDock;
+  pipelineDealName: string;
+  dismissPipelineDock: () => void;
+  startNewDeal: (dealName: string) => void;
   sourceDrawer: SourceDrawerPayload | null;
   toast: string | null;
   blueprintPopulated: boolean;
@@ -164,6 +170,8 @@ export const useStore = create<Store>()(
       heliosStage: "pre-upload",
       pipelineStageIndex: 0,
       pipelineCounters: { fields: 0, tables: 0 },
+      pipelineDock: "hidden",
+      pipelineDealName: "Project Helios",
       sourceDrawer: null,
       toast: null,
       blueprintPopulated: false,
@@ -181,6 +189,8 @@ export const useStore = create<Store>()(
           heliosStage: "pre-upload",
           pipelineStageIndex: 0,
           pipelineCounters: { fields: 0, tables: 0 },
+          pipelineDock: "hidden",
+          pipelineDealName: "Project Helios",
           sourceDrawer: null,
           toast: null,
           blueprintPopulated: false,
@@ -311,9 +321,25 @@ export const useStore = create<Store>()(
         });
       },
 
+      dismissPipelineDock: () => set({ pipelineDock: "hidden" }),
+
+      startNewDeal: (dealName) => {
+        clearExtractionTicker();
+        getActiveTimeline()?.cancel();
+        set({
+          ...heliosEmpty(),
+          heliosStage: "pre-upload",
+          pipelineStageIndex: 0,
+          pipelineCounters: { fields: 0, tables: 0 },
+          pipelineDock: "hidden",
+          pipelineDealName: dealName.trim() || "New Deal",
+          blueprintPopulated: false,
+        });
+      },
+
       startHeliosPipeline: () => {
         if (get().heliosStage !== "uploading") return;
-        set({ heliosStage: "running", pipelineStageIndex: 0, pipelineCounters: { fields: 0, tables: 0 } });
+        set({ heliosStage: "running", pipelineStageIndex: 0, pipelineCounters: { fields: 0, tables: 0 }, pipelineDock: "running" });
         const result = heliosResult();
         const totalFields = result.canonicalFields.length;
 
@@ -342,7 +368,8 @@ export const useStore = create<Store>()(
           () => {
             clearExtractionTicker();
             const r = heliosResult();
-            set({ ...r, heliosStage: "done", pipelineStageIndex: PIPELINE_STAGES.length - 1, pipelineCounters: { fields: r.canonicalFields.length, tables: TOTAL_TABLES } });
+            set({ ...r, heliosStage: "done", pipelineStageIndex: PIPELINE_STAGES.length - 1, pipelineCounters: { fields: r.canonicalFields.length, tables: TOTAL_TABLES }, pipelineDock: "done" });
+            get().showToast(`${get().pipelineDealName} — extraction complete · ${r.canonicalFields.length} fields, ${TOTAL_TABLES} tables`);
           }
         );
       },

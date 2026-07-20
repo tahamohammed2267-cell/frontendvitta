@@ -11,6 +11,7 @@ import { portfolioLabelLookup } from "../lib/portfolioData";
 import ChatPanel from "../components/ChatPanel";
 import SourceDrawer from "../components/SourceDrawer";
 import Toast from "../components/Toast";
+import GlobalPipelineDock from "../components/GlobalPipelineDock";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -156,6 +157,7 @@ export default function Layout() {
       </div>
 
       <SourceDrawer />
+      <GlobalPipelineDock />
       <Toast />
     </div>
   );
