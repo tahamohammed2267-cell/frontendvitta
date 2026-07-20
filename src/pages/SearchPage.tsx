@@ -1,47 +1,41 @@
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Command, Search } from "lucide-react";
 import { useStore } from "../lib/store";
+import { buildSearchIndex, type SearchResultType } from "../lib/intelligence/search";
 import { Badge, Card, ConfidenceBar, SourceChip } from "../lib/ui";
 
-const results = [
-  {
-    type: "Field", title: "PPA Tariff — Project Helios", to: "/projects/helios?tab=extraction",
-    snippet: <>…the Energy Price for Delivery Years 1–10 shall be <mark className="rounded bg-warn-100 px-0.5">EUR 52.40 per MWh</mark>, escalating at 1.8% p.a.…</>,
-    src: "Helios_PPA_Executed_vFinal.pdf", page: 22, conf: 0.88,
-  },
-  {
-    type: "Risk", title: "PPA tariff below term sheet floor", to: "/projects/helios?tab=intelligence",
-    snippet: <>Executed PPA prices energy at <mark className="rounded bg-warn-100 px-0.5">€52.40/MWh</mark> while the lender term sheet assumes a €54.00/MWh floor…</>,
-    src: "Term_Sheet_Northbridge.pdf", page: 5,
-  },
-  {
-    type: "Deal", title: "Project Helios — 120 MWp Solar, Spain", to: "/projects/helios",
-    snippet: <>€96.4M CAPEX · 70% gearing · tariff <mark className="rounded bg-warn-100 px-0.5">€52.40/MWh</mark> · In Diligence</>,
-    src: "Deal workspace", page: 0,
-  },
-  {
-    type: "Document", title: "Helios_PPA_Executed_vFinal.pdf", to: "/projects/helios?tab=documents",
-    snippet: <>Power Purchase Agreement · 84 pages · 31 fields extracted · tariff defined in <mark className="rounded bg-warn-100 px-0.5">Section 4.2, page 22</mark></>,
-    src: "Project Helios", page: 0,
-  },
-  {
-    type: "Deal", title: "Project Zephyr — 96 MW Wind, Denmark (Passed)", to: "/projects/zephyr",
-    snippet: <>Passed Feb 2026 — tariff <mark className="rounded bg-warn-100 px-0.5">€48.90/MWh</mark> deemed below hurdle; precedent for low-tariff analysis</>,
-    src: "Deal archive", page: 0,
-  },
-  {
-    type: "Field", title: "PPA Tariff — Project Boreas", to: "/projects/boreas?tab=extraction",
-    snippet: <>…Contract for Difference strike at <mark className="rounded bg-warn-100 px-0.5">€71.20/MWh</mark>, 15-year tenor…</>,
-    src: "Boreas_CfD_Award.pdf", page: 8, conf: 0.95,
-  },
-];
-
-const typeTone: Record<string, "blue" | "red" | "green" | "gray" | "orange"> = {
+const typeTone: Record<SearchResultType, "blue" | "red" | "green" | "gray" | "orange"> = {
   Deal: "blue", Field: "green", Document: "gray", Risk: "red",
+  Decision: "orange", Playbook: "orange", Recommendation: "orange", Observation: "gray", Pattern: "red",
 };
+
+const typeFilters: SearchResultType[] = ["Decision", "Playbook", "Recommendation", "Observation", "Pattern", "Deal", "Field", "Risk", "Document"];
+
+function renderSnippet(text: string) {
+  const parts = text.split(/(⟪[^⟫]*⟫)/g);
+  return parts.map((part, i) =>
+    part.startsWith("⟪") && part.endsWith("⟫")
+      ? <mark key={i} className="rounded bg-warn-100 px-0.5">{part.slice(1, -1)}</mark>
+      : <span key={i}>{part}</span>
+  );
+}
 
 export default function SearchPage() {
   const suggestedPrompts = useStore((s) => s.suggestedPrompts);
+  const allResults = useMemo(() => buildSearchIndex(), []);
+  const [activeTypes, setActiveTypes] = useState<Set<SearchResultType>>(new Set(typeFilters));
+
+  function toggleType(t: SearchResultType) {
+    setActiveTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(t)) next.delete(t); else next.add(t);
+      return next;
+    });
+  }
+
+  const results = allResults.filter((r) => activeTypes.has(r.type));
+
   return (
     <div className="mx-auto max-w-[1100px] px-6 py-8">
       {/* Hero */}
@@ -61,15 +55,20 @@ export default function SearchPage() {
         </div>
       </div>
 
-      <p className="mb-3 text-[12.5px] text-ink-500 fade-up"><span className="num font-semibold text-ink-900">6</span> results across 19 deals · 0.4s</p>
+      <p className="mb-3 text-[12.5px] text-ink-500 fade-up"><span className="num font-semibold text-ink-900">{results.length}</span> result{results.length === 1 ? "" : "s"} across 5 deals · institutional knowledge prioritized</p>
 
       <div className="grid grid-cols-[200px_1fr] gap-5 fade-up">
         {/* Filters */}
         <Card className="self-start">
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-ink-400">Type</p>
-          {["Deals", "Documents", "Fields", "Risks"].map((f) => (
+          {typeFilters.map((f) => (
             <label key={f} className="flex items-center gap-2 py-1 text-[12.5px] text-ink-700">
-              <input type="checkbox" defaultChecked className="h-3.5 w-3.5 rounded border-ink-300 accent-accent-600" /> {f}
+              <input
+                type="checkbox"
+                checked={activeTypes.has(f)}
+                onChange={() => toggleType(f)}
+                className="h-3.5 w-3.5 rounded border-ink-300 accent-accent-600"
+              /> {f}
             </label>
           ))}
           <p className="mb-2 mt-4 text-[11px] font-semibold uppercase tracking-wide text-ink-400">Sector</p>
@@ -93,12 +92,15 @@ export default function SearchPage() {
               <div className="flex items-center gap-2">
                 <Badge tone={typeTone[r.type]}>{r.type}</Badge>
                 <Link to={r.to} className="text-[14px] font-semibold text-ink-900 hover:text-accent-700 hover:underline">{r.title}</Link>
-                {"conf" in r && r.conf && <span className="ml-auto"><ConfidenceBar value={r.conf} /></span>}
+                {r.conf !== undefined && <span className="ml-auto"><ConfidenceBar value={r.conf} /></span>}
               </div>
-              <p className="mt-2 text-[12.5px] leading-relaxed text-ink-600">{r.snippet}</p>
-              <div className="mt-2"><SourceChip doc={r.src} page={r.page} /></div>
+              <p className="mt-2 text-[12.5px] leading-relaxed text-ink-600">{renderSnippet(r.snippet)}</p>
+              {r.page > 0 && <div className="mt-2"><SourceChip doc={r.src} page={r.page} /></div>}
             </Card>
           ))}
+          {results.length === 0 && (
+            <Card><p className="py-6 text-center text-[12.5px] text-ink-400">No results for the selected types.</p></Card>
+          )}
         </div>
       </div>
     </div>

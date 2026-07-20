@@ -8,6 +8,17 @@ import HeatmapGrid from "../widgets/HeatmapGrid";
 import WaterfallChart from "../widgets/WaterfallChart";
 import GeoMapMock from "../widgets/GeoMapMock";
 import GaugeWidget from "../widgets/GaugeWidget";
+import AssetHealthWidget from "../widgets/AssetHealthWidget";
+import FinancialSummaryWidget from "../widgets/FinancialSummaryWidget";
+import RiskWidget from "../widgets/RiskWidget";
+import PredictionWidget from "../widgets/PredictionWidget";
+import BenchmarkWidget from "../widgets/BenchmarkWidget";
+import ComparisonWidget from "../widgets/ComparisonWidget";
+import TimelineWidget from "../widgets/TimelineWidget";
+import InvestmentDecisionsWidget from "../widgets/InvestmentDecisionsWidget";
+import AnalystIntelligenceWidget from "../widgets/AnalystIntelligenceWidget";
+import InstitutionalPlaybooksWidget from "../widgets/InstitutionalPlaybooksWidget";
+import AIRecommendationsWidget from "../widgets/AIRecommendationsWidget";
 import { getComparisonValue, getHeatmapData, getMetricSeries, getMetricValue, getTableRows, metricLabels, metricUnits } from "./metricSeries";
 
 const palette = ["#0e5f45", "#1d4ed8", "#b45309", "#7c3aed", "#475569"];
@@ -144,6 +155,28 @@ export default function WidgetRenderer({ config, scope, scopeId }: { config: Wid
       const value = getMetricValue(config.metric, scope, scopeId);
       return <GaugeWidget label={label} value={value} max={unit === "%" ? 100 : Math.max(value * 1.4, 1)} unit={unit} />;
     }
+    case "assetHealth":
+      return <AssetHealthWidget scope={scope} scopeId={scopeId} metric={config.metric} />;
+    case "financialSummary":
+      return <FinancialSummaryWidget scope={scope} scopeId={scopeId} />;
+    case "risk":
+      return <RiskWidget scope={scope} scopeId={scopeId} />;
+    case "prediction":
+      return <PredictionWidget scope={scope} scopeId={scopeId} metric={config.metric} />;
+    case "benchmark":
+      return <BenchmarkWidget scope={scope} scopeId={scopeId} metric={config.metric} />;
+    case "comparison":
+      return <ComparisonWidget scope={scope} scopeId={scopeId} metric={config.metric} />;
+    case "timeline":
+      return scope === "project" ? <TimelineWidget projectId={scopeId} /> : <p className="flex h-full items-center justify-center text-center text-[11.5px] text-ink-400">Timeline is scoped to individual projects.</p>;
+    case "investmentDecisions":
+      return <InvestmentDecisionsWidget />;
+    case "analystIntelligence":
+      return <AnalystIntelligenceWidget />;
+    case "institutionalPlaybooks":
+      return <InstitutionalPlaybooksWidget />;
+    case "aiRecommendations":
+      return <AIRecommendationsWidget />;
     default:
       return null;
   }

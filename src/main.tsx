@@ -7,11 +7,11 @@ import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import NewProject from "./pages/NewProject";
 import ProjectWorkspace from "./pages/workspace/ProjectWorkspace";
-import Intelligence from "./pages/Intelligence";
+import Intelligence from "./pages/intelligence/Intelligence";
 import PortfolioHome from "./pages/portfolio/PortfolioHome";
 import IndustryDashboard from "./pages/portfolio/IndustryDashboard";
 import RegionDashboard from "./pages/portfolio/RegionDashboard";
-import ProjectDashboard from "./pages/portfolio/ProjectDashboard";
+import ProjectWorkspaceShell from "./pages/portfolio/project/ProjectWorkspaceShell";
 import CountryDashboard from "./pages/portfolio/CountryDashboard";
 import HealthCenter from "./pages/portfolio/HealthCenter";
 import DashboardBuilder from "./pages/portfolio/builder/DashboardBuilder";
@@ -35,7 +35,7 @@ const router = createBrowserRouter([
       { path: "/portfolio/country/:name", element: <CountryDashboard /> },
       { path: "/portfolio/:industry", element: <IndustryDashboard /> },
       { path: "/portfolio/:industry/:region", element: <RegionDashboard /> },
-      { path: "/portfolio/:industry/:region/:company/:project", element: <ProjectDashboard /> },
+      { path: "/portfolio/:industry/:region/:company/:project", element: <ProjectWorkspaceShell /> },
       { path: "/search", element: <SearchPage /> },
       { path: "/graph", element: <KnowledgeGraph /> },
     ],

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Plus, Share2 } from "lucide-react";
-import { portfolioLabelLookup, type WidgetConfig, type WidgetLayout } from "../../../lib/portfolioData";
+import { findProject, portfolioLabelLookup, type WidgetConfig, type WidgetLayout } from "../../../lib/portfolioData";
 import { Badge, Button, EmptyState } from "../../../lib/ui";
 import DashboardCanvas from "./DashboardCanvas";
 import AddWidgetModal from "./AddWidgetModal";
@@ -36,6 +36,10 @@ export default function DashboardBuilder() {
       // scopeId is a region id — region id encodes industry prefix in our seed data (e.g. "solar-india")
       const industry = d.scopeId.split("-")[0];
       return `/portfolio/${industry}/${d.scopeId}`;
+    }
+    if (d.scope === "project") {
+      const p = findProject(d.scopeId);
+      if (p) return `/portfolio/${p.industryKey}/${p.regionId}/${p.companyId}/${p.id}?tab=dashboards`;
     }
     return "/portfolio";
   }

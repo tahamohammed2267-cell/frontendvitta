@@ -1,7 +1,8 @@
 import {
-  aggregateKPIs, findProject, findRegion, portfolioProjects, projectsForIndustry, projectsForRegion,
+  aggregateKPIs, findIndustry, findProject, findRegion, portfolioProjects, projectsForIndustry, projectsForRegion,
   type ComparisonKey, type DashboardScope, type IndustryKey, type MetricKey, type PortfolioProject, type TimeRange,
 } from "../../../lib/portfolioData";
+import { getGlobalBenchmarkValue } from "../../../lib/globalBenchmarks";
 import type { ComparableEntity } from "../comparisons/comparisonEntities";
 
 export interface SeriesPoint { label: string; value: number }
@@ -160,26 +161,36 @@ const perProjectAdditiveMetrics: MetricKey[] = [
   "revenue", "ebitda", "netIncome", "generation", "cashFlow", "maintenanceCost", "opex", "capex", "debtService", "debtOutstanding", "openIssues",
 ];
 
+const averagedEntityKinds: ComparableEntity["kind"][] = ["industryAverage", "regionAverage", "portfolioAverage"];
+
 export function resolveEntityProjects(entity: ComparableEntity): PortfolioProject[] {
   switch (entity.kind) {
     case "project": { const p = findProject(entity.refId); return p ? [p] : []; }
     case "region": return projectsForRegion(entity.refId);
+    case "regionAverage": return projectsForRegion(entity.refId);
     case "industry": return projectsForIndustry(entity.refId as IndustryKey);
     case "industryAverage": return projectsForIndustry(entity.refId as IndustryKey);
+    case "portfolioAverage": return portfolioProjects;
     case "globalPortfolio": return portfolioProjects;
+    case "customGroup": return entity.refId.split(",").map(findProject).filter((p): p is PortfolioProject => !!p);
+    case "globalBenchmark": return [];
   }
 }
 
 export function getComparisonEntityMetricValue(metric: MetricKey, entity: ComparableEntity): number {
+  if (entity.kind === "globalBenchmark") {
+    return getGlobalBenchmarkValue(metric, entity.industryKey ? findIndustry(entity.industryKey)?.driverKind : undefined) ?? 0;
+  }
   const projects = resolveEntityProjects(entity);
   const raw = metricValueFor(metric, projects);
-  if (entity.kind === "industryAverage" && projects.length > 0 && perProjectAdditiveMetrics.includes(metric)) {
+  if (averagedEntityKinds.includes(entity.kind) && projects.length > 0 && perProjectAdditiveMetrics.includes(metric)) {
     return Math.round((raw / projects.length) * 10) / 10;
   }
   return raw;
 }
 
 export function getEntityMetricSeries(metric: MetricKey, entity: ComparableEntity, _timeRange: TimeRange): SeriesPoint[] {
+  if (entity.kind === "globalBenchmark") return [];
   const projects = resolveEntityProjects(entity);
   if (projects.length === 0) return [];
   if (entity.kind === "project") return projectMonthlySeries(metric, projects[0]);
@@ -187,10 +198,10 @@ export function getEntityMetricSeries(metric: MetricKey, entity: ComparableEntit
   // Non-project entities have no per-entity monthly series in the data model —
   // aggregate each constituent project's monthly series index-for-index (all
   // seed projects share the same 6 month labels). Additive metrics sum;
-  // ratio/score metrics average; industryAverage divides additive by count.
+  // ratio/score metrics average; averaged kinds divide additive by count.
   const months = projects[0].financials.topline.byMonth.map((m) => m.month);
   const additive = perProjectAdditiveMetrics.includes(metric);
-  const divisor = entity.kind === "industryAverage" && additive ? projects.length : 1;
+  const divisor = averagedEntityKinds.includes(entity.kind) && additive ? projects.length : 1;
   return months.map((month, i) => {
     const summed = projects.reduce((a, p) => a + (projectMonthlySeries(metric, p)[i]?.value ?? 0), 0);
     const value = additive ? summed / divisor : summed / projects.length;

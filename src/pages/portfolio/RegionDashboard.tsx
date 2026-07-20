@@ -2,15 +2,19 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import {
-  aggregateKPIs, companiesForRegion, findIndustry, findRegion,
+  aggregateKPIs, findCompany, findIndustry, findRegion,
   projectsForRegion, regionalRisks, regionsForIndustry,
 } from "../../lib/portfolioData";
 import { Badge, Card, CardHeader, EmptyState, SeverityBadge, Stat } from "../../lib/ui";
+import { cn } from "../../lib/cn";
 import InsightsPanel from "./insights/InsightsPanel";
 import CustomDashboardsSection from "./builder/CustomDashboardsSection";
 
 const statusColor: Record<string, string> = {
   Operational: "#059669", "Ramp-up": "#1d4ed8", "Under Construction": "#8a93a6", Watch: "#d97706", "At Risk": "#dc2626",
+};
+const statusTone: Record<string, "blue" | "orange" | "green" | "gray" | "red"> = {
+  Operational: "green", "Ramp-up": "blue", "Under Construction": "gray", Watch: "orange", "At Risk": "red",
 };
 
 export default function RegionDashboard() {
@@ -114,18 +118,34 @@ export default function RegionDashboard() {
           </Card>
 
           <Card pad={false}>
-            <div className="border-b border-ink-100 px-5 py-4"><CardHeader title="Companies" sub={`Operating in ${reg.name}`} /></div>
+            <div className="border-b border-ink-100 px-5 py-4"><CardHeader title="Projects" sub={`${projects.length} project${projects.length !== 1 ? "s" : ""} in ${reg.name}`} /></div>
             <div className="divide-y divide-ink-100">
-              {companiesForRegion(reg.id).map((c) => {
-                const cp = projectsForRegion(reg.id).filter((p) => p.companyId === c.id);
+              {projects.map((p) => {
+                const comp = findCompany(p.companyId);
                 return (
-                  <div key={c.id} className="flex items-center gap-4 px-5 py-3">
+                  <Link
+                    key={p.id}
+                    to={`/portfolio/${ind.key}/${reg.id}/${p.companyId}/${p.id}`}
+                    className="flex items-center gap-4 px-5 py-3 transition-colors hover:bg-ink-50"
+                  >
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-medium">{c.name}</p>
-                      <p className="mt-0.5 text-[11.5px] text-ink-500">{cp.map((p) => p.name).join(" · ")}</p>
+                      <p className="truncate text-[13px] font-medium text-ink-900">{p.name}</p>
+                      <p className="mt-0.5 text-[11.5px] text-ink-500">
+                        {comp?.name} · {p.country}{p.capacityMW ? ` · ${p.capacityMW} MW` : ""}
+                      </p>
                     </div>
-                    <Badge tone="gray">{cp.length} project{cp.length !== 1 ? "s" : ""}</Badge>
-                  </div>
+                    <span className="num shrink-0 text-[12.5px] font-semibold text-ink-700">€{p.financials.topline.revenueM}m</span>
+                    <div className="flex w-20 shrink-0 items-center gap-1.5">
+                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink-100">
+                        <div
+                          className={cn("h-full rounded-full", p.assetHealth.score >= 80 ? "bg-pos-600" : p.assetHealth.score >= 60 ? "bg-warn-600" : "bg-crit-600")}
+                          style={{ width: `${p.assetHealth.score}%` }}
+                        />
+                      </div>
+                      <span className="num text-[11px] font-semibold text-ink-600">{p.assetHealth.score}</span>
+                    </div>
+                    <Badge tone={statusTone[p.status]}>{p.status}</Badge>
+                  </Link>
                 );
               })}
             </div>

@@ -487,18 +487,98 @@ export const generatedFiles: GeneratedFile[] = [
 
 // ── Cross-deal benchmark data ───────────────────────────────
 
+export interface BenchmarkRow {
+  metric: string;
+  unit: string;
+  currentValue: number;
+  currentValueDisplay: string;
+  benchmarkP25: number;
+  benchmarkMedian: number;
+  benchmarkP75: number;
+  benchmarkDisplay: string;
+  difference: number;
+  differencePct: number;
+  trend: { period: string; value: number }[];
+  verdict: "above" | "below" | "inline";
+  aiExplanation: string;
+  supportingEvidence: { doc: string; page?: number; snippet?: string }[];
+}
+
 export const benchmarks = {
   sector: "Solar PV — Southern Europe",
   dealsEvaluated: 17,
   rows: [
-    { metric: "CAPEX / MWp", this: "€0.80M", p25: "€0.72M", median: "€0.78M", p75: "€0.86M", verdict: "inline" as const },
-    { metric: "PPA Tariff", this: "€52.4/MWh", p25: "€61/MWh", median: "€65/MWh", p75: "€70/MWh", verdict: "below" as const },
-    { metric: "P50 Yield", this: "1,812", p25: "1,640", median: "1,705", p75: "1,790", verdict: "above" as const },
-    { metric: "O&M / MWp / yr", this: "€11.2k", p25: "€11.0k", median: "€13.4k", p75: "€15.8k", verdict: "inline" as const },
-    { metric: "Gearing", this: "70%", p25: "60%", median: "67%", p75: "75%", verdict: "inline" as const },
-    { metric: "Min DSCR", this: "1.30x", p25: "1.25x", median: "1.30x", p75: "1.40x", verdict: "inline" as const },
-    { metric: "Equity IRR", this: "11.8%", p25: "9.5%", median: "11.2%", p75: "13.0%", verdict: "above" as const },
-  ],
+    {
+      metric: "CAPEX / MWp", unit: "€M",
+      currentValue: 0.80, currentValueDisplay: "€0.80M",
+      benchmarkP25: 0.72, benchmarkMedian: 0.78, benchmarkP75: 0.86, benchmarkDisplay: "€0.72M–€0.86M",
+      difference: 0.02, differencePct: 2.6,
+      trend: [{ period: "Q3 '25", value: 0.76 }, { period: "Q4 '25", value: 0.77 }, { period: "Q1 '26", value: 0.78 }, { period: "Q2 '26", value: 0.78 }],
+      verdict: "inline",
+      aiExplanation: "CAPEX sits 2.6% above the peer median, within the normal P25–P75 band — consistent with Southern European solar EPC pricing over the last two quarters.",
+      supportingEvidence: [{ doc: "EPC Contract", page: 4, snippet: "Fixed-price EPC contract value: €96,400,000" }],
+    },
+    {
+      metric: "PPA Tariff", unit: "€/MWh",
+      currentValue: 52.4, currentValueDisplay: "€52.4/MWh",
+      benchmarkP25: 61, benchmarkMedian: 65, benchmarkP75: 70, benchmarkDisplay: "€61–€70/MWh",
+      difference: -12.6, differencePct: -19.4,
+      trend: [{ period: "Q3 '25", value: 68 }, { period: "Q4 '25", value: 66 }, { period: "Q1 '26", value: 65 }, { period: "Q2 '26", value: 65 }],
+      verdict: "below",
+      aiExplanation: "Executed tariff is 19.4% below the peer median and below the P25 floor — the largest outlier on this deal. Peer-median PPA tariffs have also been trending down 6% QoQ across the comparable set, which offsets but does not close the gap.",
+      supportingEvidence: [{ doc: "PPA Agreement", page: 2, snippet: "Executed tariff: €52.40/MWh, 10-year term" }],
+    },
+    {
+      metric: "P50 Yield", unit: "kWh/kWp",
+      currentValue: 1812, currentValueDisplay: "1,812 kWh/kWp",
+      benchmarkP25: 1640, benchmarkMedian: 1705, benchmarkP75: 1790, benchmarkDisplay: "1,640–1,790 kWh/kWp",
+      difference: 22, differencePct: 1.2,
+      trend: [{ period: "Q3 '25", value: 1698 }, { period: "Q4 '25", value: 1700 }, { period: "Q1 '26", value: 1705 }, { period: "Q2 '26", value: 1705 }],
+      verdict: "above",
+      aiExplanation: "P50 yield is above the peer P75, driven by favorable irradiance at the Andalusia site — but the independent yield report assumes zero curtailment, which the peer set generally does not.",
+      supportingEvidence: [{ doc: "Independent Yield Report", page: 8, snippet: "P50 estimate: 1,812 kWh/kWp/yr, no curtailment adjustment applied" }],
+    },
+    {
+      metric: "O&M / MWp / yr", unit: "€k",
+      currentValue: 11.2, currentValueDisplay: "€11.2k",
+      benchmarkP25: 11.0, benchmarkMedian: 13.4, benchmarkP75: 15.8, benchmarkDisplay: "€11.0k–€15.8k",
+      difference: -2.2, differencePct: -16.4,
+      trend: [{ period: "Q3 '25", value: 13.1 }, { period: "Q4 '25", value: 13.3 }, { period: "Q1 '26", value: 13.4 }, { period: "Q2 '26", value: 13.4 }],
+      verdict: "inline",
+      aiExplanation: "O&M pricing sits near the P25 floor, but the underlying agreement is still in draft — the figure is indicative, not contracted, so this comparison should be treated as provisional.",
+      supportingEvidence: [{ doc: "O&M Agreement (Draft)", page: 1, snippet: "Indicative O&M fee: €11,200/MWp/yr (scope not finalized)" }],
+    },
+    {
+      metric: "Gearing", unit: "%",
+      currentValue: 70, currentValueDisplay: "70%",
+      benchmarkP25: 60, benchmarkMedian: 67, benchmarkP75: 75, benchmarkDisplay: "60%–75%",
+      difference: 3, differencePct: 4.5,
+      trend: [{ period: "Q3 '25", value: 66 }, { period: "Q4 '25", value: 66 }, { period: "Q1 '26", value: 67 }, { period: "Q2 '26", value: 67 }],
+      verdict: "inline",
+      aiExplanation: "Gearing is modestly above the peer median but within the P25–P75 band, consistent with the facility sizing in the current term sheet draft.",
+      supportingEvidence: [{ doc: "Term Sheet (Draft)", page: 3, snippet: "Senior debt: 70% of total project cost" }],
+    },
+    {
+      metric: "Min DSCR", unit: "x",
+      currentValue: 1.30, currentValueDisplay: "1.30x",
+      benchmarkP25: 1.25, benchmarkMedian: 1.30, benchmarkP75: 1.40, benchmarkDisplay: "1.25x–1.40x",
+      difference: 0.00, differencePct: 0.0,
+      trend: [{ period: "Q3 '25", value: 1.29 }, { period: "Q4 '25", value: 1.30 }, { period: "Q1 '26", value: 1.30 }, { period: "Q2 '26", value: 1.31 }],
+      verdict: "inline",
+      aiExplanation: "Minimum DSCR sits exactly at the peer median, but the PPA tariff shortfall against sizing assumptions creates downside risk to this figure in Years 3–5 if left unresolved.",
+      supportingEvidence: [{ doc: "Financial Model v3", page: 6, snippet: "Minimum DSCR (base case): 1.30x, Year 4" }],
+    },
+    {
+      metric: "Equity IRR", unit: "%",
+      currentValue: 11.8, currentValueDisplay: "11.8%",
+      benchmarkP25: 9.5, benchmarkMedian: 11.2, benchmarkP75: 13.0, benchmarkDisplay: "9.5%–13.0%",
+      difference: 0.6, differencePct: 5.4,
+      trend: [{ period: "Q3 '25", value: 11.0 }, { period: "Q4 '25", value: 11.1 }, { period: "Q1 '26", value: 11.2 }, { period: "Q2 '26", value: 11.2 }],
+      verdict: "above",
+      aiExplanation: "Projected equity IRR is above the peer median, but the underlying PPA tariff sits well below peer levels — the IRR advantage rests on the yield assumption holding, which curtailment risk could erode.",
+      supportingEvidence: [{ doc: "Financial Model v3", page: 9, snippet: "Base-case equity IRR: 11.8%" }],
+    },
+  ] as BenchmarkRow[],
 };
 
 // ── Portfolio (post-acquisition) ────────────────────────────

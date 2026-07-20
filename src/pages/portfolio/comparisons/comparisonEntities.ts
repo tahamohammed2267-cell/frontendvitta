@@ -1,6 +1,8 @@
 import type { IndustryKey, MetricKey, ProjectStatus, TimeRange } from "../../../lib/portfolioData";
 
-export type ComparableEntityKind = "project" | "region" | "industry" | "industryAverage" | "globalPortfolio";
+export type ComparableEntityKind =
+  | "project" | "region" | "industry" | "industryAverage" | "regionAverage" | "portfolioAverage"
+  | "globalPortfolio" | "customGroup" | "globalBenchmark";
 
 export interface ComparableEntity {
   kind: ComparableEntityKind;

@@ -81,7 +81,7 @@ export interface ProjectKPIs {
 }
 
 export type MISFormat = "XLSX" | "CSV" | "PDF";
-export type MISDocKind = "MIS" | "Financial Statement" | "Contract" | "EPC Report";
+export type MISDocKind = "MIS" | "Financial Statement" | "Contract" | "Technical Report" | "EPC Document" | "Inspection Report" | "Regulatory Document" | "Other";
 
 export interface ProjectDocument {
   id: string;
@@ -115,6 +115,7 @@ export interface MISVersion {
   sourceDoc: string;
   detectedChanges: DetectedChange[];
   status: MISVersionStatus;
+  reportingPeriod?: string;
 }
 
 export interface AuditEntry {
@@ -164,7 +165,10 @@ export interface PortfolioProject {
 
 // ── Dashboard builder ───────────────────────────────────────
 
-export type WidgetType = "kpi" | "bar" | "pie" | "line" | "area" | "table" | "heatmap" | "geo" | "waterfall" | "gauge" | "scatter";
+export type WidgetType =
+  | "kpi" | "bar" | "pie" | "line" | "area" | "table" | "heatmap" | "geo" | "waterfall" | "gauge" | "scatter"
+  | "prediction" | "benchmark" | "comparison" | "risk" | "assetHealth" | "financialSummary" | "timeline"
+  | "investmentDecisions" | "analystIntelligence" | "institutionalPlaybooks" | "aiRecommendations";
 
 export type MetricKey =
   | "revenue" | "revenueGrowth" | "ebitda" | "ebitdaMargin" | "netIncome"
@@ -189,7 +193,7 @@ export interface WidgetConfig {
 }
 
 export type DashboardScope = "industry" | "region" | "project" | "health";
-export type DashboardPreset = "Executive" | "Operations" | "Finance" | "Investment";
+export type DashboardPreset = "Executive" | "Operations" | "Finance" | "Investment" | "Maintenance" | "Asset Performance";
 
 export interface DashboardDef {
   id: string;
@@ -319,15 +323,18 @@ export const portfolioProjects: PortfolioProject[] = [
       { id: "pd1", name: "Rajasthan_MIS_Jun2026.xlsx", kind: "MIS", format: "XLSX", uploadedAt: "Jul 05", uploadedBy: "R. Chen" },
       { id: "pd2", name: "Rajasthan_FinStatement_Q2.pdf", kind: "Financial Statement", format: "PDF", uploadedAt: "Jul 08", uploadedBy: "R. Chen" },
       { id: "pd3", name: "ABC_Solar_PPA.pdf", kind: "Contract", format: "PDF", uploadedAt: "Mar 02", uploadedBy: "J. Moreau" },
-      { id: "pd4", name: "Rajasthan_EPC_CompletionReport.pdf", kind: "EPC Report", format: "PDF", uploadedAt: "Jan 20", uploadedBy: "S. Okafor" },
+      { id: "pd4", name: "Rajasthan_EPC_CompletionReport.pdf", kind: "EPC Document", format: "PDF", uploadedAt: "Jan 20", uploadedBy: "S. Okafor" },
     ],
     misVersions: [
-      { id: "mv1", version: 2, uploadedAt: "Jul 05, 09:12", uploadedBy: "R. Chen", sourceDoc: "Rajasthan_MIS_Jun2026.xlsx", status: "applied", detectedChanges: [
+      { id: "mv1", version: 2, uploadedAt: "Jul 05, 09:12", uploadedBy: "R. Chen", sourceDoc: "Rajasthan_MIS_Jun2026.xlsx", status: "applied", reportingPeriod: "Jun 2026", detectedChanges: [
         { id: "dc1", field: "Revenue", category: "Revenue", previousValue: "₹150 Cr", newValue: "₹162 Cr", confidence: 0.94, decision: "accepted" },
         { id: "dc2", field: "Power Generated", category: "Generation", previousValue: "398 GWh", newValue: "412 GWh", confidence: 0.97, decision: "accepted" },
         { id: "dc3", field: "O&M Cost", category: "Expenses", previousValue: "₹18.2 Cr", newValue: "₹19.8 Cr", confidence: 0.81, decision: "accepted" },
       ] },
-      { id: "mv0", version: 1, uploadedAt: "Jun 04, 10:03", uploadedBy: "R. Chen", sourceDoc: "Rajasthan_MIS_May2026.xlsx", status: "applied", detectedChanges: [] },
+      { id: "mv0", version: 1, uploadedAt: "Jun 04, 10:03", uploadedBy: "R. Chen", sourceDoc: "Rajasthan_MIS_May2026.xlsx", status: "applied", reportingPeriod: "May 2026", detectedChanges: [
+        { id: "dc0a", field: "Revenue", category: "Revenue", previousValue: "₹144 Cr", newValue: "₹150 Cr", confidence: 0.95, decision: "accepted" },
+        { id: "dc0b", field: "Power Generated", category: "Generation", previousValue: "386 GWh", newValue: "398 GWh", confidence: 0.96, decision: "accepted" },
+      ] },
     ],
     auditTrail: [
       { id: "au1", at: "Jul 05, 09:20", user: "R. Chen", action: "MIS applied", detail: "v2 — 3 of 3 detected changes accepted" },
@@ -363,7 +370,7 @@ export const portfolioProjects: PortfolioProject[] = [
       { id: "pd6", name: "Gujarat_FinStatement_Q2.pdf", kind: "Financial Statement", format: "PDF", uploadedAt: "Jul 02", uploadedBy: "R. Chen" },
     ],
     misVersions: [
-      { id: "mv2", version: 3, uploadedAt: "Jun 28, 14:44", uploadedBy: "R. Chen", sourceDoc: "Gujarat_MIS_Jun2026.xlsx", status: "partially-applied", detectedChanges: [
+      { id: "mv2", version: 3, uploadedAt: "Jun 28, 14:44", uploadedBy: "R. Chen", sourceDoc: "Gujarat_MIS_Jun2026.xlsx", status: "partially-applied", reportingPeriod: "Jun 2026", detectedChanges: [
         { id: "dc4", field: "Revenue", category: "Revenue", previousValue: "₹98 Cr", newValue: "₹94 Cr", confidence: 0.9, decision: "accepted" },
         { id: "dc5", field: "Maintenance Cost", category: "Expenses", previousValue: "₹22.1 Cr", newValue: "₹26.8 Cr", confidence: 0.72, decision: "pending" },
       ] },
@@ -528,8 +535,8 @@ export const portfolioProjects: PortfolioProject[] = [
       { id: "al6", severity: "high", text: "Q2 production 4.1% below P50 due to below-average wind speeds", raisedAt: "Jul 16" },
     ] },
     documents: [{ id: "pd14", name: "Nordwind_MIS_Jun2026.xlsx", kind: "MIS", format: "XLSX", uploadedAt: "Jun 30", uploadedBy: "S. Okafor" }],
-    misVersions: [{ id: "mv8", version: 5, uploadedAt: "Jun 30, 16:12", uploadedBy: "S. Okafor", sourceDoc: "Nordwind_MIS_Jun2026.xlsx", status: "applied", detectedChanges: [
-      { id: "dc7", field: "Revenue", category: "Revenue", previousValue: "€10.7m", newValue: "€9.8m", confidence: 0.92, decision: "accepted" },
+    misVersions: [{ id: "mv8", version: 5, uploadedAt: "Jun 30, 16:12", uploadedBy: "S. Okafor", sourceDoc: "Nordwind_MIS_Jun2026.xlsx", status: "applied", reportingPeriod: "Jun 2026", detectedChanges: [
+      { id: "dc7", field: "Revenue", category: "Revenue", previousValue: "€10.7M", newValue: "€9.8M", confidence: 0.92, decision: "accepted" },
       { id: "dc8", field: "Capacity Factor", category: "Utilization", previousValue: "31.2%", newValue: "27.4%", confidence: 0.89, decision: "accepted" },
     ] }],
     auditTrail: [{ id: "au9", at: "Jun 30, 16:20", user: "S. Okafor", action: "MIS applied", detail: "v5 — 2 of 2 detected changes accepted" }],
@@ -558,7 +565,7 @@ export const portfolioProjects: PortfolioProject[] = [
       { id: "al7", severity: "critical", text: "DSCR trending below covenant minimum for two consecutive quarters", raisedAt: "Jul 11" },
     ] },
     documents: [{ id: "pd15", name: "Zephyr_MIS_May2026.xlsx", kind: "MIS", format: "XLSX", uploadedAt: "Jun 02", uploadedBy: "J. Moreau" }],
-    misVersions: [{ id: "mv9", version: 6, uploadedAt: "Jun 02, 10:00", uploadedBy: "J. Moreau", sourceDoc: "Zephyr_MIS_May2026.xlsx", status: "applied", detectedChanges: [] }],
+    misVersions: [{ id: "mv9", version: 6, uploadedAt: "Jun 02, 10:00", uploadedBy: "J. Moreau", sourceDoc: "Zephyr_MIS_May2026.xlsx", status: "applied", reportingPeriod: "May 2026", detectedChanges: [] }],
     auditTrail: [{ id: "au10", at: "Jun 02, 10:05", user: "J. Moreau", action: "MIS applied", detail: "v6 — no material changes; MIS for June now overdue" }],
     healthFlags: [
       { rule: "revenueDown10", label: "Revenue down >10%", severity: "critical", detail: "Revenue down 11.4% YoY, driven by sustained below-average wind resource." },
@@ -613,7 +620,7 @@ export const portfolioProjects: PortfolioProject[] = [
     ] },
     documents: [
       { id: "pd17", name: "Meridian_MIS_Jun2026.xlsx", kind: "MIS", format: "XLSX", uploadedAt: "Jul 01", uploadedBy: "S. Okafor" },
-      { id: "pd18", name: "Meridian_EPC_ProgressReport.pdf", kind: "EPC Report", format: "PDF", uploadedAt: "Jul 01", uploadedBy: "S. Okafor" },
+      { id: "pd18", name: "Meridian_EPC_ProgressReport.pdf", kind: "EPC Document", format: "PDF", uploadedAt: "Jul 01", uploadedBy: "S. Okafor" },
     ],
     misVersions: [{ id: "mv11", version: 1, uploadedAt: "Jul 01, 09:00", uploadedBy: "S. Okafor", sourceDoc: "Meridian_MIS_Jun2026.xlsx", status: "pending-review", detectedChanges: [
       { id: "dc9", field: "Construction Progress", category: "KPI", previousValue: "61%", newValue: "68%", confidence: 0.85, decision: "pending" },
@@ -889,6 +896,50 @@ export const savedDashboards: DashboardDef[] = [
       w("table", "Attention List", "assetHealth", 6, 2, 6, 4),
     ],
     owner: "Jane Moreau", sharedWith: ["A. Lindqvist", "R. Chen", "S. Okafor", "M. Ferreira"], updatedAt: "Jul 18, 08:00",
+  },
+  {
+    id: "dash-intelligence-overview", name: "Deal Knowledge Overview", scope: "health", scopeId: "intelligence-firm",
+    widgets: [
+      w("investmentDecisions", "Investment Decisions", "assetHealth", 0, 0, 6, 4),
+      w("analystIntelligence", "Analyst Intelligence", "assetHealth", 6, 0, 6, 4),
+      w("institutionalPlaybooks", "Institutional Playbooks", "assetHealth", 0, 4, 6, 4),
+      w("aiRecommendations", "AI Recommendations", "assetHealth", 6, 4, 6, 4),
+    ],
+    owner: "Jane Moreau", sharedWith: ["A. Lindqvist", "R. Chen", "S. Okafor", "M. Ferreira"], updatedAt: "Jul 18, 09:30",
+  },
+  {
+    id: "dash-rajasthan-exec", name: "Rajasthan 250 MW — Executive", scope: "project", scopeId: "rajasthan-250", preset: "Executive",
+    widgets: [
+      w("kpi", "Revenue", "revenue", 0, 0, 3, 2),
+      w("kpi", "EBITDA", "ebitda", 3, 0, 3, 2),
+      w("kpi", "Asset Health", "assetHealth", 6, 0, 3, 2),
+      w("kpi", "Cash Flow", "cashFlow", 9, 0, 3, 2),
+      w("area", "Revenue Trend", "revenue", 0, 2, 6, 4),
+      w("financialSummary", "Financial Summary", "revenue", 6, 2, 6, 4),
+    ],
+    owner: "R. Chen", sharedWith: ["J. Moreau"], updatedAt: "Jul 05, 09:20",
+  },
+  {
+    id: "dash-gujarat-maintenance", name: "Gujarat 140 MW — Maintenance", scope: "project", scopeId: "gujarat-140", preset: "Maintenance",
+    widgets: [
+      w("kpi", "Maintenance Cost", "maintenanceCost", 0, 0, 4, 2),
+      w("kpi", "Asset Health", "assetHealth", 4, 0, 4, 2),
+      w("kpi", "Open Issues", "openIssues", 8, 0, 4, 2),
+      w("assetHealth", "Equipment Health", "assetHealth", 0, 2, 6, 4),
+      w("risk", "Open Risks", "assetHealth", 6, 2, 6, 4),
+    ],
+    owner: "R. Chen", sharedWith: [], updatedAt: "Jun 28, 15:00",
+  },
+  {
+    id: "dash-zephyr-risk", name: "Zephyr — Asset Performance", scope: "project", scopeId: "zephyr-project", preset: "Asset Performance",
+    widgets: [
+      w("kpi", "Revenue Growth", "revenueGrowth", 0, 0, 4, 2),
+      w("kpi", "Asset Health", "assetHealth", 4, 0, 4, 2),
+      w("kpi", "Capacity Utilization", "capacityUtilization", 8, 0, 4, 2),
+      w("risk", "Open Risks", "assetHealth", 0, 2, 6, 4),
+      w("prediction", "Revenue Forecast", "revenue", 6, 2, 6, 4),
+    ],
+    owner: "J. Moreau", sharedWith: ["A. Lindqvist"], updatedAt: "Jun 02, 10:30",
   },
 ];
 

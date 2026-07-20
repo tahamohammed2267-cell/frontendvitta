@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
-  AreaChart as AreaIcon, BarChart3, Gauge as GaugeIcon, Grid3x3, LineChart as LineIcon, Map,
-  PieChart as PieIcon, ScatterChart as ScatterIcon, Table as TableIcon, TrendingUp, Waves,
+  AreaChart as AreaIcon, BarChart3, BookMarked, Brain, Clock, Gauge as GaugeIcon, GitCompare, Grid3x3, HeartPulse, LineChart as LineIcon, Map,
+  NotebookPen, PieChart as PieIcon, Ruler, ScatterChart as ScatterIcon, ShieldAlert, Sparkles, Table as TableIcon, Target, TrendingUp, Wallet, Waves,
 } from "lucide-react";
 import type { ComparisonKey, MetricKey, TimeRange, WidgetType } from "../../../lib/portfolioData";
 import { Button, Modal } from "../../../lib/ui";
@@ -20,7 +20,27 @@ const widgetTypes: { type: WidgetType; label: string; icon: typeof BarChart3 }[]
   { type: "waterfall", label: "Waterfall", icon: Waves },
   { type: "gauge", label: "Gauge", icon: GaugeIcon },
   { type: "scatter", label: "Scatter Plot", icon: ScatterIcon },
+  { type: "assetHealth", label: "Asset Health", icon: HeartPulse },
+  { type: "financialSummary", label: "Financial Summary", icon: Wallet },
+  { type: "risk", label: "Risk", icon: ShieldAlert },
+  { type: "prediction", label: "Prediction", icon: Target },
+  { type: "benchmark", label: "Benchmark", icon: Ruler },
+  { type: "comparison", label: "Comparison", icon: GitCompare },
+  { type: "timeline", label: "Timeline", icon: Clock },
+  { type: "investmentDecisions", label: "Investment Decisions", icon: Brain },
+  { type: "analystIntelligence", label: "Analyst Intelligence", icon: NotebookPen },
+  { type: "institutionalPlaybooks", label: "Institutional Playbooks", icon: BookMarked },
+  { type: "aiRecommendations", label: "AI Recommendations", icon: Sparkles },
 ];
+
+// Composite widgets render their own content and don't use config.metric —
+// step 2 (metric picker) is skipped for these, same as the pre-existing
+// composite types (assetHealth/financialSummary/risk/prediction/benchmark/
+// comparison/timeline), which already ignored the picked metric.
+const nonMetricTypes = new Set<WidgetType>([
+  "assetHealth", "financialSummary", "risk", "timeline",
+  "investmentDecisions", "analystIntelligence", "institutionalPlaybooks", "aiRecommendations",
+]);
 
 const timeRanges: TimeRange[] = ["MTD", "QTD", "YTD", "Custom"];
 const comparisons: { key: ComparisonKey; label: string }[] = [
@@ -40,8 +60,19 @@ export default function AddWidgetModal({
   function reset() { setStep(1); setType(null); setMetric(null); setTimeRange("YTD"); setComparison("lastYear"); }
   function close() { reset(); onClose(); }
 
+  function goToStep2Or3() {
+    if (type && nonMetricTypes.has(type)) setStep(3);
+    else setStep(2);
+  }
+
   function submit() {
-    if (!type || !metric) return;
+    if (!type) return;
+    if (nonMetricTypes.has(type)) {
+      onAdd({ type, title: widgetTypes.find((w) => w.type === type)!.label, metric: "assetHealth", timeRange, comparison });
+      close();
+      return;
+    }
+    if (!metric) return;
     onAdd({ type, title: metricLabels[metric], metric, timeRange, comparison });
     close();
   }
@@ -66,7 +97,7 @@ export default function AddWidgetModal({
               </button>
             ))}
           </div>
-          <div className="mt-5 flex justify-end"><Button className={!type ? "pointer-events-none opacity-40" : ""} onClick={() => setStep(2)}>Continue</Button></div>
+          <div className="mt-5 flex justify-end"><Button className={!type ? "pointer-events-none opacity-40" : ""} onClick={goToStep2Or3}>Continue</Button></div>
         </div>
       )}
 
@@ -106,7 +137,7 @@ export default function AddWidgetModal({
             ))}
           </div>
           <div className="flex justify-between">
-            <Button variant="ghost" onClick={() => setStep(2)}>Back</Button>
+            <Button variant="ghost" onClick={() => setStep(type && nonMetricTypes.has(type) ? 1 : 2)}>Back</Button>
             <Button onClick={submit}>Add widget</Button>
           </div>
         </div>
