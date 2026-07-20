@@ -170,7 +170,8 @@ export type MetricKey =
   | "revenue" | "revenueGrowth" | "ebitda" | "ebitdaMargin" | "netIncome"
   | "generation" | "capacityUtilization" | "assetHealth" | "cashFlow"
   | "maintenanceCost" | "opex" | "capex" | "debtService"
-  | "panelEfficiency" | "availability";
+  | "panelEfficiency" | "availability"
+  | "debtOutstanding" | "openIssues";
 
 export type TimeRange = "MTD" | "QTD" | "YTD" | "Custom";
 export type ComparisonKey = "none" | "prevMonth" | "prevQuarter" | "budget" | "forecast" | "target" | "lastYear";
@@ -784,6 +785,37 @@ export function findProject(id: string) { return portfolioProjects.find((p) => p
 
 export function portfolioLabelLookup(id: string): string | undefined {
   return findRegion(id)?.name ?? findCompany(id)?.name ?? findProject(id)?.name ?? industries.find((i) => i.key === id)?.name;
+}
+
+// ── Cross-industry country rollups ──────────────────────────
+// Region.countryCode is NOT a reliable grouping key across industries
+// (e.g. "Europe" spans ES/DE/GB depending on industry) — the only
+// consistent shared key across the seed data is Region.name.
+
+export interface CountryGroup {
+  name: string;
+  regionIds: string[];
+  industryKeys: IndustryKey[];
+}
+
+export function countryGroups(): CountryGroup[] {
+  const byName = new Map<string, CountryGroup>();
+  for (const r of regions) {
+    const g = byName.get(r.name) ?? { name: r.name, regionIds: [], industryKeys: [] };
+    g.regionIds.push(r.id);
+    if (!g.industryKeys.includes(r.industryKey)) g.industryKeys.push(r.industryKey);
+    byName.set(r.name, g);
+  }
+  return [...byName.values()];
+}
+
+export function projectsForCountry(name: string) {
+  const ids = regions.filter((r) => r.name === name).map((r) => r.id);
+  return portfolioProjects.filter((p) => ids.includes(p.regionId));
+}
+
+export function findCountryGroup(name: string) {
+  return countryGroups().find((g) => g.name === name);
 }
 
 // ── Health Center ────────────────────────────────────────────

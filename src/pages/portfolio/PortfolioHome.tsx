@@ -3,13 +3,14 @@ import { Link } from "react-router-dom";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowUpRight, Building2, HeartPulse, MapPin, Sun, TrendingDown, TrendingUp, Wind } from "lucide-react";
 import {
-  aggregateKPIs, industries, portfolioProjects, projectsForIndustry, projectsForRegion,
-  projectsRequiringAttention, regions, type PortfolioProject, type Region,
+  aggregateKPIs, countryGroups, industries, portfolioProjects, projectsForCountry, projectsForIndustry,
+  projectsRequiringAttention, type CountryGroup, type PortfolioProject,
 } from "../../lib/portfolioData";
 import { Badge, Card, CardHeader, Stat } from "../../lib/ui";
 import { cn } from "../../lib/cn";
 import InsightsPanel from "./insights/InsightsPanel";
 import PortfolioAskPanel from "./insights/PortfolioAskPanel";
+import ComparisonsSection from "./comparisons/ComparisonsSection";
 
 const industryIcon = { solar: Sun, wind: Wind, infrastructure: Building2 };
 const MONTHS = ["Feb", "Mar", "Apr", "May", "Jun", "Jul"];
@@ -28,8 +29,8 @@ const orderedProjects = [
 export default function PortfolioHome() {
   const summary = aggregateKPIs(portfolioProjects);
   const attention = projectsRequiringAttention();
+  const groups = countryGroups();
   const [showAllProjects, setShowAllProjects] = useState(false);
-  const [showAllRegions, setShowAllRegions] = useState(false);
 
   const revenueTrend = MONTHS.map((month, i) => ({
     month,
@@ -38,13 +39,12 @@ export default function PortfolioHome() {
   }));
 
   const visibleProjects = showAllProjects ? orderedProjects : orderedProjects.slice(0, 3);
-  const visibleRegions = showAllRegions ? regions : regions.slice(0, 3);
 
   return (
     <div className="mx-auto max-w-[1200px] px-6 py-6">
       <div className="mb-6 fade-up">
         <h1 className="text-[22px] font-semibold tracking-tight">Portfolio Monitoring</h1>
-        <p className="mt-0.5 text-[13px] text-ink-500">Live performance across {industries.length} industries, {portfolioProjects.length} projects and {regions.length} regions.</p>
+        <p className="mt-0.5 text-[13px] text-ink-500">Live performance across {industries.length} industries, {portfolioProjects.length} projects and {groups.length} regions.</p>
       </div>
 
       {/* Hero: KPI band + portfolio revenue trend */}
@@ -125,11 +125,11 @@ export default function PortfolioHome() {
             </div>
           </section>
 
-          {/* Regions */}
+          {/* Regions — cross-industry country rollups */}
           <section>
-            <SectionTitle title="Regions" action={<SeeAll expanded={showAllRegions} onClick={() => setShowAllRegions((v) => !v)} total={regions.length} />} />
+            <SectionTitle title="Regions" />
             <div className="grid grid-cols-3 gap-4 stagger">
-              {visibleRegions.map((r, i) => <RegionCard key={r.id} r={r} index={i} />)}
+              {groups.map((g, i) => <CountryCard key={g.name} g={g} index={i} />)}
             </div>
           </section>
 
@@ -159,6 +159,11 @@ export default function PortfolioHome() {
           <PortfolioAskPanel />
         </div>
       </div>
+
+      {/* Comparables — full width */}
+      <section className="mt-6 fade-up">
+        <ComparisonsSection />
+      </section>
     </div>
   );
 }
@@ -229,21 +234,21 @@ function ProjectCard({ p, index }: { p: PortfolioProject; index: number }) {
   );
 }
 
-function RegionCard({ r, index }: { r: Region; index: number }) {
-  const projects = projectsForRegion(r.id);
+function CountryCard({ g, index }: { g: CountryGroup; index: number }) {
+  const projects = projectsForCountry(g.name);
   const s = aggregateKPIs(projects);
   const flagged = projects.filter((p) => p.healthFlags.length > 0).length;
   return (
-    <Link to={`/portfolio/${r.industryKey}/${r.id}`} style={{ "--i": index } as React.CSSProperties}>
+    <Link to={`/portfolio/country/${encodeURIComponent(g.name)}`} style={{ "--i": index } as React.CSSProperties}>
       <Card className="lift h-full">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="num flex h-6 items-center rounded bg-ink-100 px-1.5 text-[10.5px] font-semibold text-ink-500">{r.countryCode}</span>
-            <p className="text-[13.5px] font-semibold">{r.name}</p>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent-50 text-accent-600"><MapPin size={17} strokeWidth={1.8} /></div>
+            <p className="text-[13.5px] font-semibold">{g.name}</p>
           </div>
-          <Badge tone={r.industryKey === "solar" ? "orange" : r.industryKey === "wind" ? "blue" : "gray"} className="capitalize">{r.industryKey}</Badge>
+          {flagged > 0 && <Badge tone="orange">{flagged} flagged</Badge>}
         </div>
-        <p className="mt-1 text-[11.5px] text-ink-500">{projects.length} project{projects.length !== 1 ? "s" : ""}{flagged > 0 ? ` · ${flagged} flagged` : ""}</p>
+        <p className="mt-2 text-[11.5px] text-ink-500">{g.industryKeys.length} industr{g.industryKeys.length !== 1 ? "ies" : "y"} · {projects.length} projects</p>
         <div className="mt-3 space-y-1.5 text-[12px]">
           <Row k="Revenue" v={`€${s.totalRevenueM}m`} />
           <Row k="EBITDA" v={`€${s.totalEbitdaM}m`} />

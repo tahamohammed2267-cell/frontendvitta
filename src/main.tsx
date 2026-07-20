@@ -12,8 +12,10 @@ import PortfolioHome from "./pages/portfolio/PortfolioHome";
 import IndustryDashboard from "./pages/portfolio/IndustryDashboard";
 import RegionDashboard from "./pages/portfolio/RegionDashboard";
 import ProjectDashboard from "./pages/portfolio/ProjectDashboard";
+import CountryDashboard from "./pages/portfolio/CountryDashboard";
 import HealthCenter from "./pages/portfolio/HealthCenter";
 import DashboardBuilder from "./pages/portfolio/builder/DashboardBuilder";
+import ComparisonView from "./pages/portfolio/comparisons/ComparisonView";
 import SearchPage from "./pages/SearchPage";
 import KnowledgeGraph from "./pages/KnowledgeGraph";
 
@@ -29,6 +31,8 @@ const router = createBrowserRouter([
       { path: "/portfolio", element: <PortfolioHome /> },
       { path: "/portfolio/health", element: <HealthCenter /> },
       { path: "/portfolio/dashboards/:dashboardId/edit", element: <DashboardBuilder /> },
+      { path: "/portfolio/comparisons/:comparisonId", element: <ComparisonView /> },
+      { path: "/portfolio/country/:name", element: <CountryDashboard /> },
       { path: "/portfolio/:industry", element: <IndustryDashboard /> },
       { path: "/portfolio/:industry/:region", element: <RegionDashboard /> },
       { path: "/portfolio/:industry/:region/:company/:project", element: <ProjectDashboard /> },

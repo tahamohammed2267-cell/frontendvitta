@@ -1,9 +1,16 @@
 import {
   aggregateKPIs, findProject, findRegion, portfolioProjects, projectsForIndustry, projectsForRegion,
-  type ComparisonKey, type DashboardScope, type MetricKey, type PortfolioProject, type TimeRange,
+  type ComparisonKey, type DashboardScope, type IndustryKey, type MetricKey, type PortfolioProject, type TimeRange,
 } from "../../../lib/portfolioData";
+import type { ComparableEntity } from "../comparisons/comparisonEntities";
 
 export interface SeriesPoint { label: string; value: number }
+
+// Shared display formatting so "€M" metrics render as our "€…m" convention.
+export function formatMetric(value: number, unit: string) {
+  if (unit === "€M") return `${value < 0 ? "-" : ""}€${Math.abs(value).toLocaleString()}m`;
+  return `${value.toLocaleString()}${unit}`;
+}
 
 function scopedProjects(scope: DashboardScope, scopeId: string) {
   if (scope === "industry") return projectsForIndustry(scopeId as "solar" | "wind" | "infrastructure");
@@ -30,6 +37,8 @@ function metricValueFor(metric: MetricKey, projects: ReturnType<typeof scopedPro
     case "debtService": return Math.round(projects.reduce((a, p) => a + p.financials.costs.debtServiceM, 0) * 10) / 10;
     case "panelEfficiency": return projects.length ? Math.round((projects.reduce((a, p) => a + (p.drivers.metrics.find((m) => m.label.includes("Efficiency"))?.value ?? 0), 0) / projects.length) * 10) / 10 : 0;
     case "availability": return projects.length ? Math.round((projects.reduce((a, p) => a + (p.drivers.metrics.find((m) => m.label.includes("Availability"))?.value ?? 0), 0) / projects.length) * 10) / 10 : 0;
+    case "debtOutstanding": return Math.round(projects.reduce((a, p) => a + p.kpis.debtOutstandingM, 0) * 10) / 10;
+    case "openIssues": return projects.reduce((a, p) => a + p.assetHealth.openIssues, 0);
     default: return 0;
   }
 }
@@ -39,12 +48,30 @@ export const metricLabels: Record<MetricKey, string> = {
   netIncome: "Net Income", generation: "Generation", capacityUtilization: "Capacity Utilization",
   assetHealth: "Asset Health", cashFlow: "Cash Flow", maintenanceCost: "Maintenance Cost",
   opex: "OPEX", capex: "CAPEX", debtService: "Debt Service", panelEfficiency: "Panel Efficiency", availability: "Availability",
+  debtOutstanding: "Debt Outstanding", openIssues: "Open Issues",
 };
 
 export const metricUnits: Record<MetricKey, string> = {
   revenue: "€M", revenueGrowth: "%", ebitda: "€M", ebitdaMargin: "%", netIncome: "€M", generation: "GWh",
   capacityUtilization: "%", assetHealth: "", cashFlow: "€M", maintenanceCost: "€M", opex: "€M", capex: "€M",
   debtService: "€M", panelEfficiency: "%", availability: "%",
+  debtOutstanding: "€M", openIssues: "",
+};
+
+export type MetricCategory = "businessDrivers" | "topline" | "earnings" | "costBreakdown" | "operationalKPIs" | "financialKPIs" | "custom";
+
+export const metricCategoryLabels: Record<MetricCategory, string> = {
+  businessDrivers: "Business Drivers", topline: "Topline", earnings: "Earnings", costBreakdown: "Cost Breakdown",
+  operationalKPIs: "Operational KPIs", financialKPIs: "Financial KPIs", custom: "Custom Metrics",
+};
+
+export const metricCategories: Record<MetricKey, MetricCategory> = {
+  revenue: "topline", revenueGrowth: "topline",
+  ebitda: "earnings", ebitdaMargin: "earnings", netIncome: "earnings",
+  generation: "operationalKPIs", capacityUtilization: "operationalKPIs", panelEfficiency: "operationalKPIs", availability: "operationalKPIs",
+  assetHealth: "financialKPIs", cashFlow: "financialKPIs", debtService: "financialKPIs",
+  maintenanceCost: "costBreakdown", opex: "costBreakdown", capex: "costBreakdown",
+  debtOutstanding: "custom", openIssues: "custom",
 };
 
 const comparisonFactor: Record<ComparisonKey, number> = {
@@ -120,4 +147,53 @@ export function getTableRows(scope: DashboardScope, scopeId: string, metric: Met
 export function getHeatmapData(scope: DashboardScope, scopeId: string, metric: MetricKey) {
   const projects = scopedProjects(scope, scopeId);
   return projects.map((p) => ({ row: p.name, col: metricLabels[metric], value: metricValueFor(metric, [p]) }));
+}
+
+// ── Comparison entity resolution ────────────────────────────
+// Parallel to scopedProjects/DashboardScope above, but for the comparisons
+// feature: a ComparableEntity can be a single project, a region, an
+// industry (total or per-project average), or the whole portfolio —
+// shapes DashboardScope can't express. Delegates to the same metricValueFor
+// switch so every MetricKey computation stays defined in one place.
+
+const perProjectAdditiveMetrics: MetricKey[] = [
+  "revenue", "ebitda", "netIncome", "generation", "cashFlow", "maintenanceCost", "opex", "capex", "debtService", "debtOutstanding", "openIssues",
+];
+
+export function resolveEntityProjects(entity: ComparableEntity): PortfolioProject[] {
+  switch (entity.kind) {
+    case "project": { const p = findProject(entity.refId); return p ? [p] : []; }
+    case "region": return projectsForRegion(entity.refId);
+    case "industry": return projectsForIndustry(entity.refId as IndustryKey);
+    case "industryAverage": return projectsForIndustry(entity.refId as IndustryKey);
+    case "globalPortfolio": return portfolioProjects;
+  }
+}
+
+export function getComparisonEntityMetricValue(metric: MetricKey, entity: ComparableEntity): number {
+  const projects = resolveEntityProjects(entity);
+  const raw = metricValueFor(metric, projects);
+  if (entity.kind === "industryAverage" && projects.length > 0 && perProjectAdditiveMetrics.includes(metric)) {
+    return Math.round((raw / projects.length) * 10) / 10;
+  }
+  return raw;
+}
+
+export function getEntityMetricSeries(metric: MetricKey, entity: ComparableEntity, _timeRange: TimeRange): SeriesPoint[] {
+  const projects = resolveEntityProjects(entity);
+  if (projects.length === 0) return [];
+  if (entity.kind === "project") return projectMonthlySeries(metric, projects[0]);
+
+  // Non-project entities have no per-entity monthly series in the data model —
+  // aggregate each constituent project's monthly series index-for-index (all
+  // seed projects share the same 6 month labels). Additive metrics sum;
+  // ratio/score metrics average; industryAverage divides additive by count.
+  const months = projects[0].financials.topline.byMonth.map((m) => m.month);
+  const additive = perProjectAdditiveMetrics.includes(metric);
+  const divisor = entity.kind === "industryAverage" && additive ? projects.length : 1;
+  return months.map((month, i) => {
+    const summed = projects.reduce((a, p) => a + (projectMonthlySeries(metric, p)[i]?.value ?? 0), 0);
+    const value = additive ? summed / divisor : summed / projects.length;
+    return { label: month, value: Math.round(value * 10) / 10 };
+  });
 }
