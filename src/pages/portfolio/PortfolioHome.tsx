@@ -51,8 +51,8 @@ export default function PortfolioHome() {
       <Card className="mb-6 fade-up" pad={false}>
         <div className="grid grid-cols-[1.1fr_1.4fr]">
           <div className="grid grid-cols-2 gap-y-6 border-r border-ink-100 p-6">
-            <Stat label="Total portfolio value" value={`€${summary.totalValueM}m`} series={revenueTrend.map((r) => r.revenue + r.ebitda)} trend="up" />
-            <Stat label="Total revenue" value={`€${summary.totalRevenueM}m`} series={revenueTrend.map((r) => r.revenue)} delta={`${summary.yoyGrowthPct >= 0 ? "+" : ""}${summary.yoyGrowthPct}%`} sub="YoY avg" trend={summary.yoyGrowthPct >= 0 ? "up" : "down"} />
+            <Stat label="Total portfolio value" value={`€${summary.totalValueM}m`} trend="up" />
+            <Stat label="Total revenue" value={`€${summary.totalRevenueM}m`} delta={`${summary.yoyGrowthPct >= 0 ? "+" : ""}${summary.yoyGrowthPct}%`} sub="YoY avg" trend={summary.yoyGrowthPct >= 0 ? "up" : "down"} />
             <Stat label="Installed capacity" value={`${summary.installedCapacityMW.toLocaleString()} MW`} sub={`${summary.activeProjects} active projects`} />
             <Stat label="Avg asset health" value={`${summary.avgAssetHealth}`} sub={`${attention.length} projects flagged`} trend={attention.length > 0 ? "down" : "flat"} />
           </div>
