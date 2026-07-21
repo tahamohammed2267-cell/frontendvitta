@@ -9,13 +9,69 @@ export interface ChatCitation {
   page: number;
 }
 
+// A bar the AI can render inline in its answer. `value` may be negative
+// (the bar chart draws a zero baseline); color is derived from the sign
+// unless overridden.
+export interface ChatBar {
+  label: string;
+  value: number;
+  color?: string;
+}
+
+export interface ChatChart {
+  kind: "bar";
+  title: string;
+  unit?: string;
+  bars: ChatBar[];
+}
+
+// A scripted next-step the answer offers. `query` is sent back through the
+// chat when clicked, so it must match another reply's keywords.
+export interface ChatFollowUp {
+  label: string;
+  query: string;
+}
+
 export interface ChatReply {
   keywords: string[];
   text: string;
   citations?: ChatCitation[];
+  chart?: ChatChart;
+  followUps?: ChatFollowUp[];
 }
 
 export const chatReplies: ChatReply[] = [
+  {
+    // ── Wind portfolio demo Q&A ──────────────────────────────
+    // Ask: "Why is the wind portfolio underperforming this quarter?"
+    keywords: ["wind", "underperform", "underperforming"],
+    text: "The wind book (4 assets, 558 MW, €49.7M revenue) is being dragged by its two Danish sites — this is concentrated, not portfolio-wide. Nordwind Park II (132 MW) fell 6.8% to €9.8M and Zephyr (96 MW) fell 11.4% to €6.1M, both missing P50 generation for the second consecutive quarter as Q2 wind speeds ran ~9% below the long-term average [1][2]. Zephyr is now At Risk: EBITDA margin has slipped to 52.5% and net income turned negative [3]. The other two assets are healthy — Boreas (Germany, 210 MW) is ramping at +2.1% and Tamil Nadu (India, 120 MW) grew 8.9% on an 80.3% margin [4]. Net: the weakness is weather-driven and specific to Denmark, not a structural problem across the book.",
+    citations: [
+      { n: 1, doc: "Nordwind_MIS_Jun2026.xlsx", page: 3 },
+      { n: 2, doc: "Zephyr_Yield_Report_P50.pdf", page: 12 },
+      { n: 3, doc: "Zephyr_MIS_May2026.xlsx", page: 2 },
+      { n: 4, doc: "Wind_Portfolio_MIS_Q2.xlsx", page: 1 },
+    ],
+    followUps: [
+      { label: "Generate a bar graph showing the same", query: "Generate a bar graph of revenue growth by asset" },
+    ],
+  },
+  {
+    // Follow-up: renders the wind revenue-growth chart inline.
+    keywords: ["bar graph", "bar chart"],
+    text: "Here's Q2 revenue growth by wind asset. The two Danish sites (red) are dragging the book while Germany and India (green) keep growing:",
+    chart: {
+      kind: "bar",
+      title: "Revenue growth YoY by wind asset",
+      unit: "%",
+      bars: [
+        { label: "Boreas", value: 2.1 },
+        { label: "Nordwind II", value: -6.8 },
+        { label: "Zephyr", value: -11.4 },
+        { label: "Tamil Nadu", value: 8.9 },
+      ],
+    },
+  },
   {
     keywords: ["risk", "biggest", "concern", "worry"],
     text: "Three stand out. First, the executed PPA tariff (€52.40/MWh) sits below the €54.00/MWh floor the term sheet was sized on, compressing DSCR in Years 3–5 [1][2]. Second, the O&M agreement is still a draft, so the €11.2k/MWp/yr cost is indicative [3]. Third, curtailment exposure is unquantified — the yield report assumes zero, but regional curtailment ran 2.1% in 2025 [4]. Want me to draft sponsor questions for each?",

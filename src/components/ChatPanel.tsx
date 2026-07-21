@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowUp, Check, Eye, FileText, GitCompareArrows, MessageSquareText, Plus, Sparkles, Table2 } from "lucide-react";
+import { ArrowUp, BarChart3, Check, Eye, FileText, GitCompareArrows, Plus, Sparkles, Table2 } from "lucide-react";
 import { useStore } from "../lib/store";
 import type { ChatMessage } from "../lib/store";
+import type { ChatChart } from "../lib/chatResponses";
 import { SourceChip } from "../lib/ui";
 import { useTypewriter } from "../lib/motion";
 import { cn } from "../lib/cn";
@@ -128,6 +129,8 @@ function AiMessage({
         {!done && <span className="ml-0.5 inline-block h-3.5 w-[2px] -translate-y-[1px] animate-pulse bg-accent-600 align-middle" />}
       </p>
 
+      {done && msg.chart && <ChatBarChart chart={msg.chart} />}
+
       {done && msg.citations && msg.citations.length > 0 && (
         <div className="mt-2.5 space-y-1.5 border-t border-ink-100 pt-2.5 fade-up">
           <p className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">Sources</p>
@@ -140,22 +143,72 @@ function AiMessage({
         </div>
       )}
 
-      {done && isLatest && !thinking && (
-        <div className="mt-3 space-y-1.5 fade-up">
-          <p className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">Suggested next steps</p>
-          {FOLLOW_UPS.map((a) => (
-            <button
-              key={a.label}
-              onClick={() => onAction(a.query)}
-              className="group flex w-full items-center gap-2 rounded-lg border border-ink-200 bg-white px-2.5 py-2 text-left text-[12px] text-ink-700 transition-colors hover:border-accent-500 hover:bg-accent-50"
-            >
-              <a.icon size={13} className="shrink-0 text-ink-400 group-hover:text-accent-600" />
-              <span className="flex-1">{a.label}</span>
-              <ArrowUp size={12} className="shrink-0 rotate-45 text-ink-300 group-hover:text-accent-600" />
-            </button>
-          ))}
-        </div>
-      )}
+      {done && isLatest && !thinking && (() => {
+        // A scripted answer can carry its own next steps (e.g. the wind
+        // answer offering the bar graph); otherwise fall back to generics.
+        const items = (msg.followUps ?? FOLLOW_UPS).map((a) => ({
+          label: a.label,
+          query: a.query,
+          icon: (a as { icon?: typeof BarChart3 }).icon ?? BarChart3,
+        }));
+        if (items.length === 0) return null;
+        return (
+          <div className="mt-3 space-y-1.5 fade-up">
+            <p className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-400">Suggested next steps</p>
+            {items.map((a) => (
+              <button
+                key={a.label}
+                onClick={() => onAction(a.query)}
+                className="group flex w-full items-center gap-2 rounded-lg border border-ink-200 bg-white px-2.5 py-2 text-left text-[12px] text-ink-700 transition-colors hover:border-accent-500 hover:bg-accent-50"
+              >
+                <a.icon size={13} className="shrink-0 text-ink-400 group-hover:text-accent-600" />
+                <span className="flex-1">{a.label}</span>
+                <ArrowUp size={12} className="shrink-0 rotate-45 text-ink-300 group-hover:text-accent-600" />
+              </button>
+            ))}
+          </div>
+        );
+      })()}
+    </div>
+  );
+}
+
+// ── Inline bar chart the AI can render in an answer ─────────────
+// Diverging vertical bars with a zero baseline; green above, red below,
+// so a "which assets are dragging" question answers itself visually.
+function ChatBarChart({ chart }: { chart: ChatChart }) {
+  const W = 300, H = 176, topPad = 24, botPad = 34;
+  const plotH = H - topPad - botPad;
+  const vals = chart.bars.map((b) => b.value);
+  const maxV = Math.max(0, ...vals);
+  const minV = Math.min(0, ...vals);
+  const range = maxV - minV || 1;
+  const zeroY = topPad + plotH * (maxV / range);
+  const slot = W / chart.bars.length;
+  const barW = Math.min(44, slot * 0.5);
+
+  return (
+    <div className="mt-3 rounded-lg border border-ink-200 bg-white p-3 fade-up">
+      <p className="mb-1.5 text-[11.5px] font-semibold text-ink-800">{chart.title}</p>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={chart.title}>
+        <line x1={0} x2={W} y1={zeroY} y2={zeroY} stroke="#dde1e9" strokeWidth={1} />
+        {chart.bars.map((b) => {
+          const cx = slot * chart.bars.indexOf(b) + slot / 2;
+          const h = (Math.abs(b.value) / range) * plotH;
+          const up = b.value >= 0;
+          const y = up ? zeroY - h : zeroY;
+          const color = b.color ?? (up ? "#16805d" : "#dc2626");
+          return (
+            <g key={b.label}>
+              <rect x={cx - barW / 2} y={y} width={barW} height={Math.max(1, h)} rx={2.5} fill={color} />
+              <text x={cx} y={up ? y - 6 : y + h + 13} textAnchor="middle" fontSize={10.5} fontWeight={600} fill={color} style={{ fontFamily: "var(--font-mono)" }}>
+                {b.value > 0 ? "+" : ""}{b.value}{chart.unit}
+              </text>
+              <text x={cx} y={H - 8} textAnchor="middle" fontSize={10} fill="#8a93a6">{b.label}</text>
+            </g>
+          );
+        })}
+      </svg>
     </div>
   );
 }
@@ -169,7 +222,7 @@ function AgentThinking({ context }: { context: "firm" | "project" }) {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
-    const id = setInterval(() => setActive((a) => Math.min(a + 1, steps.length - 1)), 620);
+    const id = setInterval(() => setActive((a) => Math.min(a + 1, steps.length - 1)), 700);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

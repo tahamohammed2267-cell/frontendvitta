@@ -41,7 +41,7 @@ export function useInView<T extends HTMLElement>(threshold = 0.35) {
 // Streams a string in word-by-word so an AI answer *arrives* rather
 // than blinking into existence. Returns the revealed slice + a done
 // flag so callers can hold citations/actions until the text lands.
-export function useTypewriter(text: string, { speed = 18, enabled = true } = {}) {
+export function useTypewriter(text: string, { speed = 4, enabled = true } = {}) {
   const reduced = usePrefersReducedMotion();
   const [count, setCount] = useState(reduced || !enabled ? text.length : 0);
   const words = text.split(/(\s+)/); // keep whitespace tokens

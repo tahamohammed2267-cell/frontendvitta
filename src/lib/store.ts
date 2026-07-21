@@ -26,12 +26,14 @@ import type {
   ValidationFlag,
 } from "./mockData";
 import { getActiveTimeline, runTimeline } from "./timeline";
-import { pickReply, type ChatCitation } from "./chatResponses";
+import { pickReply, type ChatChart, type ChatCitation, type ChatFollowUp } from "./chatResponses";
 
 export interface ChatMessage {
   role: "user" | "ai";
   text: string;
   citations?: ChatCitation[];
+  chart?: ChatChart;
+  followUps?: ChatFollowUp[];
 }
 
 export type HeliosStage = "pre-upload" | "uploading" | "running" | "done";
@@ -439,13 +441,15 @@ export const useStore = create<Store>()(
         const trimmed = text.trim();
         if (!trimmed) return;
         set((s) => ({ chatSample: [...s.chatSample, { role: "user", text: trimmed }], chatThinking: true }));
+        // Long enough for the agent's "reading the workspace" steps to actually
+        // play through before the answer lands — this is the demo moment.
         setTimeout(() => {
           const reply = pickReply(trimmed);
           set((s) => ({
-            chatSample: [...s.chatSample, { role: "ai", text: reply.text, citations: reply.citations }],
+            chatSample: [...s.chatSample, { role: "ai", text: reply.text, citations: reply.citations, chart: reply.chart, followUps: reply.followUps }],
             chatThinking: false,
           }));
-        }, 800);
+        }, 2800);
       },
 
       clearChat: () => set({ chatSample: [], chatThinking: false }),
