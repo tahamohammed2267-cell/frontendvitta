@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
-import { useEffect } from "react";
-import { X } from "lucide-react";
+import { useEffect, useId } from "react";
+import { createPortal } from "react-dom";
+import { ArrowDownRight, ArrowUpRight, X } from "lucide-react";
 import { cn } from "./cn";
 import { useStore } from "./store";
+import { useCountUp, useInView } from "./motion";
 
 // ── Card ────────────────────────────────────────────────────
 
@@ -107,15 +109,90 @@ export function Button({
   );
 }
 
-// ── KPI stat ────────────────────────────────────────────────
+// ── Sparkline ───────────────────────────────────────────────
+// Compact trend line with a soft gradient fill. Draws in left→right
+// when it enters the viewport (unless the tile already handles that).
 
-export function Stat({ label, value, sub, trend }: { label: string; value: string; sub?: string; trend?: "up" | "down" | "flat" }) {
+const trendStroke = { up: "#0e5f45", down: "#dc2626", flat: "#8a93a6" } as const;
+
+export function Sparkline({
+  data, trend = "flat", width = 96, height = 32, animate = true, className, color, stretch = false,
+}: { data: number[]; trend?: "up" | "down" | "flat"; width?: number; height?: number; animate?: boolean; className?: string; color?: string; stretch?: boolean }) {
+  const gid = useId().replace(/:/g, "");
+  if (!data || data.length < 2) return null;
+
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const span = max - min || 1;
+  const stepX = width / (data.length - 1);
+  const pad = 3;
+  const y = (v: number) => pad + (height - pad * 2) * (1 - (v - min) / span);
+  const pts = data.map((v, i) => [i * stepX, y(v)] as const);
+  const line = pts.map(([x, yy], i) => `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${yy.toFixed(1)}`).join(" ");
+  const area = `${line} L ${width} ${height} L 0 ${height} Z`;
+  const stroke = color ?? trendStroke[trend];
+  const [lx, ly] = pts[pts.length - 1];
+
   return (
-    <div>
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      width={stretch ? "100%" : width}
+      height={stretch ? "100%" : height}
+      className={cn(animate && "spark-draw", className)}
+      preserveAspectRatio="none"
+      aria-hidden
+    >
+      <defs>
+        <linearGradient id={`sg-${gid}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={stroke} stopOpacity={0.18} />
+          <stop offset="100%" stopColor={stroke} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={area} fill={`url(#sg-${gid})`} />
+      <path d={line} fill="none" stroke={stroke} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={lx} cy={ly} r={2} fill={stroke} />
+    </svg>
+  );
+}
+
+// ── KPI stat ────────────────────────────────────────────────
+// Premium metric tile: count-up value, a delta chip, and an inline
+// sparkline that packs six months of trend into the same footprint.
+// Every field beyond `label`/`value` is optional, so existing call
+// sites keep working untouched.
+
+export function Stat({
+  label, value, sub, trend, series, delta,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  trend?: "up" | "down" | "flat";
+  series?: number[];
+  delta?: string;
+}) {
+  const { ref, inView } = useInView<HTMLDivElement>();
+  const shown = useCountUp(value, inView);
+  const tone = trend === "up" ? "text-pos-700" : trend === "down" ? "text-crit-700" : "text-ink-500";
+
+  return (
+    <div ref={ref}>
       <p className="text-[12px] font-medium text-ink-500">{label}</p>
-      <p className="num mt-1 text-[26px] font-semibold leading-none tracking-tight text-ink-900">{value}</p>
-      {sub && (
-        <p className={cn("mt-1.5 text-[12px]", trend === "up" ? "text-pos-700" : trend === "down" ? "text-crit-700" : "text-ink-500")}>{sub}</p>
+      <div className="mt-1 flex items-end justify-between gap-3">
+        <p className="num text-[26px] font-semibold leading-none tracking-tight text-ink-900">{shown}</p>
+        {series && series.length > 1 && inView && (
+          <Sparkline data={series} trend={trend} className="mb-0.5 shrink-0" />
+        )}
+      </div>
+      {(delta || sub) && (
+        <div className={cn("mt-1.5 flex items-center gap-1 text-[12px]", tone)}>
+          {delta && trend && trend !== "flat" && (
+            trend === "up" ? <ArrowUpRight size={13} className="shrink-0" /> : <ArrowDownRight size={13} className="shrink-0" />
+          )}
+          {delta && <span className="num font-medium">{delta}</span>}
+          {delta && sub && <span className="text-ink-300">·</span>}
+          {sub && <span className={delta ? "text-ink-500" : undefined}>{sub}</span>}
+        </div>
       )}
     </div>
   );
@@ -180,7 +257,7 @@ export function Modal({
   }, [open, onClose]);
 
   if (!open) return null;
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/40 p-6 fade-up" onClick={onClose}>
       <div
         className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-lg border border-ink-200 bg-white shadow-[0_20px_60px_rgba(11,14,20,0.25)]"
@@ -196,7 +273,8 @@ export function Modal({
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -211,7 +289,7 @@ export function Drawer({
   }, [open, onClose]);
 
   if (!open) return null;
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex justify-end bg-ink-950/40" onClick={onClose}>
       <div
         className="fade-up flex h-full flex-col overflow-hidden border-l border-ink-200 bg-white shadow-[0_0_40px_rgba(11,14,20,0.15)]"
@@ -227,7 +305,8 @@ export function Drawer({
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

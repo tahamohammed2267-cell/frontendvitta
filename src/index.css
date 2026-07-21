@@ -214,6 +214,19 @@ body {
   animation: floaty 2.4s ease-in-out infinite;
 }
 
+/* Sparkline draws in left→right when its tile scrolls into view */
+@keyframes sparkDraw {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+.spark-draw {
+  animation: sparkDraw 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* Count-up flash when a number changes */
 @keyframes tickFlash {
   0% {

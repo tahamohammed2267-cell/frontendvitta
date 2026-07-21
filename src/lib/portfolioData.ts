@@ -763,6 +763,20 @@ export function aggregateKPIs(projects: PortfolioProject[]): PortfolioSummary {
   return { totalValueM, totalRevenueM, totalEbitdaM, installedCapacityMW, capacityUtilizationPct, activeProjects, avgAssetHealth, cashFlowM, yoyGrowthPct };
 }
 
+// Month-by-month revenue and EBITDA summed across a set of projects — the
+// series behind the sparkline tiles on every rollup dashboard.
+export function monthlyAggregates(projects: PortfolioProject[]): { revenue: number[]; ebitda: number[] } {
+  const len = projects[0]?.financials.topline.byMonth.length ?? 0;
+  const revenue: number[] = [];
+  const ebitda: number[] = [];
+  for (let i = 0; i < len; i++) {
+    const rev = round1(sum(projects, (p) => p.financials.topline.byMonth[i]?.revenueM ?? 0));
+    revenue.push(rev);
+    ebitda.push(round1(sum(projects, (p) => (p.financials.topline.byMonth[i]?.revenueM ?? 0) * (p.financials.earnings.marginPct / 100))));
+  }
+  return { revenue, ebitda };
+}
+
 function sum<T>(items: T[], fn: (i: T) => number) { return items.reduce((a, i) => a + fn(i), 0); }
 function avg<T>(items: T[], fn: (i: T) => number) { return items.length ? sum(items, fn) / items.length : 0; }
 function round1(n: number) { return Math.round(n * 10) / 10; }

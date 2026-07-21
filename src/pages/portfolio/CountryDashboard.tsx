@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Building2, Sun, Wind } from "lucide-react";
 import {
-  aggregateKPIs, findCountryGroup, findIndustry, projectsForCountry, regions,
+  aggregateKPIs, findCountryGroup, findIndustry, monthlyAggregates, projectsForCountry, regions,
 } from "../../lib/portfolioData";
 import { Badge, Card, CardHeader, EmptyState, SectionLabel, Stat } from "../../lib/ui";
 import InsightsPanel from "./insights/InsightsPanel";
@@ -23,6 +23,7 @@ export default function CountryDashboard() {
 
   const projects = projectsForCountry(group.name);
   const summary = aggregateKPIs(projects);
+  const monthly = monthlyAggregates(projects);
 
   const industryRows = group.industryKeys.map((key) => {
     const ind = findIndustry(key)!;
@@ -44,8 +45,8 @@ export default function CountryDashboard() {
 
       <div className="mb-6 grid grid-cols-4 gap-4 fade-up">
         <Card><Stat label="Portfolio value" value={`€${summary.totalValueM}m`} /></Card>
-        <Card><Stat label="Revenue" value={`€${summary.totalRevenueM}m`} sub={`${summary.yoyGrowthPct >= 0 ? "+" : ""}${summary.yoyGrowthPct}% YoY`} trend={summary.yoyGrowthPct >= 0 ? "up" : "down"} /></Card>
-        <Card><Stat label="EBITDA" value={`€${summary.totalEbitdaM}m`} /></Card>
+        <Card><Stat label="Revenue" value={`€${summary.totalRevenueM}m`} series={monthly.revenue} delta={`${summary.yoyGrowthPct >= 0 ? "+" : ""}${summary.yoyGrowthPct}%`} sub="YoY" trend={summary.yoyGrowthPct >= 0 ? "up" : "down"} /></Card>
+        <Card><Stat label="EBITDA" value={`€${summary.totalEbitdaM}m`} series={monthly.ebitda} trend="flat" /></Card>
         <Card><Stat label="Avg asset health" value={`${summary.avgAssetHealth}`} /></Card>
       </div>
 

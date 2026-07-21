@@ -1,9 +1,9 @@
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, FolderKanban, Lightbulb, Briefcase, Search, Network,
-  Settings, Plus, PanelRightClose, PanelRightOpen, Command,
+  Settings, Plus, PanelRightClose, PanelRightOpen,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "../lib/cn";
 import { useStore } from "../lib/store";
 import { getActiveTimeline } from "../lib/timeline";
@@ -16,19 +16,42 @@ import GlobalPipelineDock from "../components/GlobalPipelineDock";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/search", label: "Search", icon: Search },
   { to: "/projects", label: "Deals", icon: FolderKanban },
   { to: "/intelligence", label: "Intelligence", icon: Lightbulb },
   { to: "/portfolio", label: "Portfolio", icon: Briefcase },
   { to: "/graph", label: "Knowledge Graph", icon: Network },
 ];
 
+// Friendly name for whatever screen is open — the header "Ask vitta" reads it.
+function screenLabel(pathname: string): string {
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts.length === 0) return "Dashboard";
+  const map: Record<string, string> = {
+    projects: "Deals", intelligence: "Intelligence", portfolio: "Portfolio", search: "Search", graph: "Knowledge Graph",
+    health: "Health Center", comparisons: "this comparison", country: "this region", new: "New Deal", dashboards: "this dashboard",
+    helios: "Project Helios", boreas: "Project Boreas", meridian: "Meridian Retail Park", atlas: "Atlas Student Living", zephyr: "Project Zephyr",
+    solar: "Solar", wind: "Wind", infrastructure: "Infrastructure",
+  };
+  const last = parts[parts.length - 1];
+  return map[last] ?? portfolioLabelLookup(last) ?? getComparison(last)?.name ?? "this page";
+}
+
 export default function Layout() {
-  const [aiOpen, setAiOpen] = useState(true);
+  const [aiOpen, setAiOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const currentUser = useStore((s) => s.currentUser);
   const reset = useStore((s) => s.reset);
   const inProject = location.pathname.startsWith("/projects/") && location.pathname !== "/projects/new";
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Reset the workspace scroll to the top on every route change — content
+  // scrolls inside this container (not the window), so navigating from a
+  // scrolled-down page would otherwise land mid-page on the next one.
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0, left: 0 });
+  }, [location.pathname]);
 
   // Presenter hotkeys (invisible, no UI): r resets all demo state; 1/2/3
   // jump to the three acts; / opens search; → / ⇧→ skip or complete
@@ -75,18 +98,6 @@ export default function Layout() {
       <aside className="flex w-[216px] shrink-0 flex-col border-r border-ink-200 bg-white">
         <div className="flex h-14 items-center border-b border-ink-100 px-4">
           <span className="text-[16px] font-semibold text-ink-900" style={{ letterSpacing: "-0.02em" }}>vitta</span>
-        </div>
-
-        {/* Search */}
-        <div className="px-3 pt-3">
-          <NavLink
-            to="/search"
-            className="flex items-center gap-2 rounded-lg border border-ink-200 bg-ink-50 px-2.5 py-2 text-[12.5px] text-ink-400 transition-colors hover:border-ink-300 hover:text-ink-600"
-          >
-            <Search size={14} />
-            <span className="flex-1">Search everything…</span>
-            <span className="flex items-center gap-0.5 rounded border border-ink-200 bg-white px-1 text-[10px]"><Command size={9} />K</span>
-          </NavLink>
         </div>
 
         <nav className="mt-3 flex-1 space-y-0.5 px-3">
@@ -145,15 +156,18 @@ export default function Layout() {
             </button>
           </div>
         </header>
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <Outlet />
+        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+          {/* Keyed by route so each navigation replays the entrance animation */}
+          <div key={location.pathname} className="fade-up">
+            <Outlet />
+          </div>
         </div>
       </main>
 
       {/* ── Right AI panel ───────────────────────────── */}
       <div className={cn("shrink-0 overflow-hidden border-l border-ink-200 bg-white transition-[width] duration-300 ease-out", aiOpen ? "w-[340px]" : "w-0 border-l-0")}>
         <div className="h-full w-[340px]">
-          <ChatPanel context={inProject ? "project" : "firm"} />
+          <ChatPanel context={inProject ? "project" : "firm"} screen={screenLabel(location.pathname)} />
         </div>
       </div>
 

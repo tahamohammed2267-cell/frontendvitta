@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
-  aggregateKPIs, driverSchemaLabels, findIndustry,
+  aggregateKPIs, driverSchemaLabels, findIndustry, monthlyAggregates,
   projectsForIndustry, projectsForRegion, regionsForIndustry,
 } from "../../lib/portfolioData";
 import { Badge, Card, CardHeader, EmptyState, SectionLabel, Stat } from "../../lib/ui";
@@ -23,6 +23,7 @@ export default function IndustryDashboard() {
 
   const projects = projectsForIndustry(ind.key);
   const summary = aggregateKPIs(projects);
+  const monthly = monthlyAggregates(projects);
   const driverLabels = driverSchemaLabels[ind.driverKind];
 
   // averaged driver values across projects (metrics are matched by label position)
@@ -51,8 +52,8 @@ export default function IndustryDashboard() {
 
       <div className="mb-6 grid grid-cols-4 gap-4 fade-up">
         <Card><Stat label="Portfolio value" value={`€${summary.totalValueM}m`} /></Card>
-        <Card><Stat label="Revenue" value={`€${summary.totalRevenueM}m`} sub={`${summary.yoyGrowthPct >= 0 ? "+" : ""}${summary.yoyGrowthPct}% YoY`} trend={summary.yoyGrowthPct >= 0 ? "up" : "down"} /></Card>
-        <Card><Stat label="EBITDA" value={`€${summary.totalEbitdaM}m`} /></Card>
+        <Card><Stat label="Revenue" value={`€${summary.totalRevenueM}m`} series={monthly.revenue} delta={`${summary.yoyGrowthPct >= 0 ? "+" : ""}${summary.yoyGrowthPct}%`} sub="YoY" trend={summary.yoyGrowthPct >= 0 ? "up" : "down"} /></Card>
+        <Card><Stat label="EBITDA" value={`€${summary.totalEbitdaM}m`} series={monthly.ebitda} trend="flat" /></Card>
         <Card><Stat label="Installed capacity" value={ind.key === "infrastructure" ? "—" : `${summary.installedCapacityMW.toLocaleString()} MW`} sub={`${summary.capacityUtilizationPct}% utilization`} /></Card>
       </div>
 

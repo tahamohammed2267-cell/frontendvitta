@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ArrowUpRight, Building2, HeartPulse, MapPin, Sun, TrendingDown, TrendingUp, Wind } from "lucide-react";
+import { AreaTrend, CHART } from "../../lib/charts";
 import {
   aggregateKPIs, countryGroups, industries, portfolioProjects, projectsForCountry, projectsForIndustry,
   projectsRequiringAttention, type CountryGroup, type PortfolioProject,
 } from "../../lib/portfolioData";
-import { Badge, Card, CardHeader, Stat } from "../../lib/ui";
+import { Badge, Card, CardHeader, Sparkline, Stat } from "../../lib/ui";
 import { cn } from "../../lib/cn";
 import InsightsPanel from "./insights/InsightsPanel";
 import PortfolioAskPanel from "./insights/PortfolioAskPanel";
@@ -51,8 +51,8 @@ export default function PortfolioHome() {
       <Card className="mb-6 fade-up" pad={false}>
         <div className="grid grid-cols-[1.1fr_1.4fr]">
           <div className="grid grid-cols-2 gap-y-6 border-r border-ink-100 p-6">
-            <Stat label="Total portfolio value" value={`€${summary.totalValueM}m`} />
-            <Stat label="Total revenue" value={`€${summary.totalRevenueM}m`} sub={`${summary.yoyGrowthPct >= 0 ? "+" : ""}${summary.yoyGrowthPct}% YoY avg`} trend={summary.yoyGrowthPct >= 0 ? "up" : "down"} />
+            <Stat label="Total portfolio value" value={`€${summary.totalValueM}m`} series={revenueTrend.map((r) => r.revenue + r.ebitda)} trend="up" />
+            <Stat label="Total revenue" value={`€${summary.totalRevenueM}m`} series={revenueTrend.map((r) => r.revenue)} delta={`${summary.yoyGrowthPct >= 0 ? "+" : ""}${summary.yoyGrowthPct}%`} sub="YoY avg" trend={summary.yoyGrowthPct >= 0 ? "up" : "down"} />
             <Stat label="Installed capacity" value={`${summary.installedCapacityMW.toLocaleString()} MW`} sub={`${summary.activeProjects} active projects`} />
             <Stat label="Avg asset health" value={`${summary.avgAssetHealth}`} sub={`${attention.length} projects flagged`} trend={attention.length > 0 ? "down" : "flat"} />
           </div>
@@ -64,18 +64,15 @@ export default function PortfolioHome() {
                 <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-ink-300" /> EBITDA</span>
               </div>
             </div>
-            <div className="h-[168px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={revenueTrend} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-                  <CartesianGrid vertical={false} stroke="#eceef3" />
-                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#8a93a6" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "#8a93a6" }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #dde1e9" }} formatter={(v: number) => [`€${v}m`, ""]} />
-                  <Area type="monotone" dataKey="ebitda" stroke="#b9c0cf" strokeWidth={2} fill="#b9c0cf" fillOpacity={0.12} />
-                  <Area type="monotone" dataKey="revenue" stroke="#0e5f45" strokeWidth={2} fill="#0e5f45" fillOpacity={0.14} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+            <AreaTrend
+              data={revenueTrend}
+              xKey="month"
+              height={168}
+              series={[
+                { key: "revenue", label: "Revenue", color: CHART.accent, format: (v) => `€${v}m` },
+                { key: "ebitda", label: "EBITDA", color: CHART.muted, format: (v) => `€${v}m` },
+              ]}
+            />
           </div>
         </div>
       </Card>
@@ -196,7 +193,7 @@ function Row({ k, v }: { k: string; v: string }) {
 }
 
 function ProjectCard({ p, index }: { p: PortfolioProject; index: number }) {
-  const spark = p.financials.topline.byMonth.map((m) => ({ x: m.month, v: m.revenueM }));
+  const spark = p.financials.topline.byMonth.map((m) => m.revenueM);
   const up = p.kpis.yoyGrowthPct >= 0;
   const flagged = p.healthFlags.length > 0;
   const Trend = up ? TrendingUp : TrendingDown;
@@ -210,12 +207,8 @@ function ProjectCard({ p, index }: { p: PortfolioProject; index: number }) {
           </div>
           <p className="mt-0.5 flex items-center gap-1 text-[11.5px] text-ink-500"><MapPin size={11} /> {p.country}</p>
         </div>
-        <div className="h-[42px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={spark} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
-              <Area type="monotone" dataKey="v" stroke={flagged ? "#d97706" : "#0e5f45"} strokeWidth={1.75} fill={flagged ? "#d97706" : "#0e5f45"} fillOpacity={0.12} />
-            </AreaChart>
-          </ResponsiveContainer>
+        <div className="h-[42px] px-1">
+          <Sparkline data={spark} trend={up ? "up" : "down"} color={flagged ? "#d97706" : undefined} stretch className="h-full w-full" />
         </div>
         <div className="flex items-end justify-between px-4 pb-4 pt-2">
           <div>

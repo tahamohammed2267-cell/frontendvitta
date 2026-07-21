@@ -19,13 +19,14 @@ export default function OverviewTab({
   const milestones = milestonesForProject(proj.id).filter((m) => m.status === "upcoming" || m.status === "overdue");
   const stories = storiesForProject(proj.id);
   const latestStory = stories[0];
+  const revSeries = proj.financials.topline.byMonth.map((m) => m.revenueM);
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-4 gap-4">
         <Card><Stat label="Portfolio value" value={`€${proj.kpis.portfolioValueM}m`} /></Card>
-        <Card><Stat label="Revenue" value={`€${proj.financials.topline.revenueM}m`} sub={`${proj.kpis.yoyGrowthPct >= 0 ? "+" : ""}${proj.kpis.yoyGrowthPct}% YoY`} trend={proj.kpis.yoyGrowthPct >= 0 ? "up" : "down"} /></Card>
-        <Card><Stat label="EBITDA" value={`€${proj.financials.earnings.ebitdaM}m`} sub={`${proj.financials.earnings.marginPct}% margin`} /></Card>
+        <Card><Stat label="Revenue" value={`€${proj.financials.topline.revenueM}m`} series={revSeries} delta={`${proj.kpis.yoyGrowthPct >= 0 ? "+" : ""}${proj.kpis.yoyGrowthPct}%`} sub="YoY" trend={proj.kpis.yoyGrowthPct >= 0 ? "up" : "down"} /></Card>
+        <Card><Stat label="EBITDA" value={`€${proj.financials.earnings.ebitdaM}m`} series={revSeries.map((v) => Math.round(v * (proj.financials.earnings.marginPct / 100) * 10) / 10)} sub={`${proj.financials.earnings.marginPct}% margin`} trend="flat" /></Card>
         <Card><Stat label="Asset health" value={`${proj.assetHealth.score}`} sub={`${proj.assetHealth.openIssues} open issues`} trend={proj.assetHealth.score >= 80 ? "up" : proj.assetHealth.score < 65 ? "down" : "flat"} /></Card>
       </div>
 
