@@ -146,7 +146,7 @@ export default function OverviewTab() {
         {/* Right col */}
         <div className="space-y-4">
           <Card>
-            <CardHeader title="Findings" sub="Latest from the intelligence layer" right={<Link to="?tab=intelligence" className="text-[12.5px] font-medium text-accent-600">All</Link>} />
+            <CardHeader title="Findings" sub="Latest from the intelligence layer" right={<Link to="?tab=reconciliation" className="text-[12.5px] font-medium text-accent-600">All</Link>} />
             <div className="space-y-3">
               {risks.slice(0, 4).map((r) => (
                 <div key={r.id} className="flex gap-2.5">

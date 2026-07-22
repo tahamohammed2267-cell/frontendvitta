@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { ChevronDown, Database, Download, Plus, Search } from "lucide-react";
 import type { CanonicalField } from "../../../lib/mockData";
 import { useStore } from "../../../lib/store";
-import { downloadCSV, downloadJSON } from "../../../lib/download";
+import { downloadCSV } from "../../../lib/download";
 import { Badge, Button, Card, ConfidenceBar, EmptyState, SourceChip } from "../../../lib/ui";
 import { cn } from "../../../lib/cn";
 
@@ -14,15 +14,12 @@ const statusMeta: Record<CanonicalField["status"], { label: string; tone: "blue"
   missing: { label: "Missing", tone: "red" },
 };
 
-const passes = [
-  { n: "1", name: "Blueprint pass", detail: "38 high-priority template fields" },
-  { n: "2", name: "Open extraction", detail: "61 additional values" },
-  { n: "3", name: "Table extraction", detail: "12 structured tables" },
-  { n: "4", name: "Canonical mapping", detail: "aliases → standard vocabulary" },
-  { n: "5", name: "Gap-fill", detail: "2 fields backfilled" },
-];
-
 const statusFilters = ["all", "ai-extracted", "human-confirmed", "overridden", "computed", "missing"] as const;
+
+// Display-only relabeling — the underlying category string on each
+// CanonicalField/Conflict stays "Costs" (other consumers, e.g. Intelligence's
+// DNA scoring, filter on that exact string), only the rail's visible label changes.
+const categoryLabels: Record<string, string> = { Costs: "Costs and Capex" };
 
 export default function ExtractionTab() {
   const canonicalFields = useStore((s) => s.canonicalFields);
@@ -69,35 +66,14 @@ export default function ExtractionTab() {
             onClick={() =>
               downloadCSV(
                 canonicalFields.map((f) => ({ field: f.field, category: f.category, value: f.value, confidence: f.confidence, status: f.status, source_doc: f.source.doc, source_page: f.source.page })),
-                "helios_canonical_fields.csv"
+                "helios_canonical_fields.xlsx"
               )
             }
           >
-            <Download size={13} /> CSV
-          </Button>
-          <Button variant="secondary" onClick={() => downloadJSON(canonicalFields, "helios_canonical_fields.json")}>
-            <Download size={13} /> JSON
+            <Download size={13} /> Download as XLSX
           </Button>
         </div>
       </div>
-
-      {/* Pipeline explainer */}
-      <Card>
-        <div className="flex items-stretch gap-0 overflow-x-auto">
-          {passes.map((p, i) => (
-            <div key={p.n} className="flex min-w-0 flex-1 items-center">
-              <div className="min-w-0 px-1">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-50 text-[10.5px] font-bold text-accent-700">{p.n}</span>
-                  <p className="whitespace-nowrap text-[12.5px] font-semibold">{p.name}</p>
-                </div>
-                <p className="mt-1 whitespace-nowrap pl-7 text-[11px] text-ink-500">{p.detail}</p>
-              </div>
-              {i < passes.length - 1 && <div className="mx-2 h-px w-6 shrink-0 bg-ink-200" />}
-            </div>
-          ))}
-        </div>
-      </Card>
 
       {/* Toolbar */}
       <div className="flex items-center gap-3">
@@ -129,7 +105,7 @@ export default function ExtractionTab() {
           </button>
           {cats.map(([c, n]) => (
             <button key={c} onClick={() => setCat(cat === c ? null : c)} className={cn("flex w-full items-center justify-between rounded-lg px-3 py-2 text-[12.5px] font-medium", cat === c ? "bg-ink-900 text-white" : "text-ink-600 hover:bg-ink-100")}>
-              {c} <span className="num text-[11px] opacity-70">{n}</span>
+              {categoryLabels[c] ?? c} <span className="num text-[11px] opacity-70">{n}</span>
             </button>
           ))}
         </div>

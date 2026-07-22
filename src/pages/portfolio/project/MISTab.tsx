@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { FileSpreadsheet } from "lucide-react";
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { MISVersion, PortfolioProject } from "../../../lib/portfolioData";
 import { detectRepeatedIssues, significantMovements } from "../mis/misIntelligence";
 import { Badge, Card, CardHeader, EmptyState } from "../../../lib/ui";
@@ -41,20 +40,6 @@ export default function MISTab({ project: proj }: { project: PortfolioProject })
                 ))}
               </div>
             )}
-          </Card>
-
-          <Card>
-            <CardHeader title="MIS Trends" sub="Revenue trend across reporting periods" />
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={proj.financials.topline.byMonth} margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>
-                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#8a93a6" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 11, fill: "#8a93a6" }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #dde1e9" }} />
-                  <Area type="monotone" dataKey="revenueM" stroke="#0e5f45" strokeWidth={2} fill="#0e5f45" fillOpacity={0.15} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
           </Card>
         </div>
 

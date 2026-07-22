@@ -130,6 +130,11 @@ export default function PortfolioHome() {
             </div>
           </section>
 
+          {/* Comparables */}
+          <section>
+            <ComparisonsSection />
+          </section>
+
           {/* Attention */}
           <Card pad={false}>
             <div className="border-b border-ink-100 px-5 py-4"><CardHeader title="Projects requiring attention" sub="Top of the Health Center triage list" /></div>
@@ -156,11 +161,6 @@ export default function PortfolioHome() {
           <PortfolioAskPanel />
         </div>
       </div>
-
-      {/* Comparables — full width */}
-      <section className="mt-6 fade-up">
-        <ComparisonsSection />
-      </section>
     </div>
   );
 }

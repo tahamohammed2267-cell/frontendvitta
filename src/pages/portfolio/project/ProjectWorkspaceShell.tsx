@@ -11,16 +11,9 @@ import OverviewTab from "./OverviewTab";
 import DashboardsTab from "./DashboardsTab";
 import FinancialsTab from "./FinancialsTab";
 import BusinessDriversTab from "./BusinessDriversTab";
-import AssetHealthTab from "./AssetHealthTab";
-import RisksTab from "./RisksTab";
-import IntelligenceTab from "./IntelligenceTab";
-import PredictionsTab from "./PredictionsTab";
-import ComparisonsTab from "./ComparisonsTab";
 import BenchmarkingTab from "./BenchmarkingTab";
 import MISTab from "./MISTab";
-import DocumentsTab from "./DocumentsTab";
-import ProjectStoryTab from "./ProjectStoryTab";
-import ReportsTab from "./ReportsTab";
+import StoryAndReportsTab from "./StoryAndReportsTab";
 
 const statusTone: Record<string, "blue" | "orange" | "green" | "gray" | "red"> = {
   Operational: "green", "Ramp-up": "blue", "Under Construction": "gray", Watch: "orange", "At Risk": "red",
@@ -31,16 +24,9 @@ const tabs = [
   { id: "dashboards", label: "Dashboards" },
   { id: "financials", label: "Financials" },
   { id: "business-drivers", label: "Business Drivers" },
-  { id: "asset-health", label: "Asset Health" },
-  { id: "risks", label: "Risks" },
-  { id: "intelligence", label: "Intelligence" },
-  { id: "predictions", label: "Predictions" },
-  { id: "comparisons", label: "Comparisons" },
   { id: "benchmarking", label: "Benchmarking" },
   { id: "mis", label: "MIS" },
-  { id: "documents", label: "Documents" },
-  { id: "story", label: "Story" },
-  { id: "reports", label: "Reports" },
+  { id: "story-reports", label: "Story and Reports" },
 ] as const;
 
 export default function ProjectWorkspaceShell() {
@@ -114,9 +100,6 @@ export default function ProjectWorkspaceShell() {
                 )}
               >
                 {t.label}
-                {t.id === "risks" && risks.length > 0 && (
-                  <span className="num rounded-md bg-warn-100 px-1.5 py-0.5 text-[10.5px] font-semibold text-warn-700">{risks.length}</span>
-                )}
                 {tab === t.id && <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-accent-600" />}
               </button>
             ))}
@@ -130,16 +113,9 @@ export default function ProjectWorkspaceShell() {
           {tab === "dashboards" && <DashboardsTab project={proj} />}
           {tab === "financials" && <FinancialsTab project={proj} />}
           {tab === "business-drivers" && <BusinessDriversTab project={proj} industry={ind} />}
-          {tab === "asset-health" && <AssetHealthTab project={proj} />}
-          {tab === "risks" && <RisksTab project={proj} />}
-          {tab === "intelligence" && <IntelligenceTab project={proj} />}
-          {tab === "predictions" && <PredictionsTab project={proj} />}
-          {tab === "comparisons" && <ComparisonsTab project={proj} />}
           {tab === "benchmarking" && <BenchmarkingTab project={proj} />}
           {tab === "mis" && <MISTab project={proj} />}
-          {tab === "documents" && <DocumentsTab project={proj} />}
-          {tab === "story" && <ProjectStoryTab project={proj} />}
-          {tab === "reports" && <ReportsTab project={proj} />}
+          {tab === "story-reports" && <StoryAndReportsTab project={proj} />}
         </div>
       </div>
 

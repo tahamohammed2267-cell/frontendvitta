@@ -43,6 +43,7 @@ export interface DealDocument {
   fieldsExtracted: number;
   ocrApplied: boolean;
   format: "PDF" | "DOCX" | "XLSX" | "PPTX" | "PNG";
+  version: number;
 }
 
 export interface CanonicalField {
@@ -227,20 +228,20 @@ export const projects: Project[] = [
 // ── Documents (Project Helios) ──────────────────────────────
 
 export const documents: DealDocument[] = [
-  { id: "d1", name: "Helios_PPA_Executed_vFinal.pdf", type: "Power Purchase Agreement", status: "done", pages: 84, sizeMB: 6.2, uploadedAt: "Jul 12, 10:04", uploadedBy: "J. Moreau", progress: 100, fieldsExtracted: 31, ocrApplied: false, format: "PDF" },
-  { id: "d2", name: "EPC_Contract_SolarBond.pdf", type: "EPC Contract", status: "done", pages: 212, sizeMB: 18.4, uploadedAt: "Jul 12, 10:06", uploadedBy: "J. Moreau", progress: 100, fieldsExtracted: 47, ocrApplied: false, format: "PDF" },
-  { id: "d3", name: "Financial_Model_v3.2.xlsx", type: "Financial Model", status: "done", pages: 1, sizeMB: 3.1, uploadedAt: "Jul 12, 10:11", uploadedBy: "R. Chen", progress: 100, fieldsExtracted: 58, ocrApplied: false, format: "XLSX" },
-  { id: "d4", name: "Solar_Resource_Assessment_PVSyst.pdf", type: "Resource / Yield Report", status: "done", pages: 96, sizeMB: 11.8, uploadedAt: "Jul 12, 10:14", uploadedBy: "R. Chen", progress: 100, fieldsExtracted: 22, ocrApplied: false, format: "PDF" },
-  { id: "d5", name: "Land_Lease_Andalusia.pdf", type: "Land Lease", status: "done", pages: 41, sizeMB: 4.4, uploadedAt: "Jul 12, 11:32", uploadedBy: "J. Moreau", progress: 100, fieldsExtracted: 14, ocrApplied: true, format: "PDF" },
-  { id: "d6", name: "Insurance_Placement_Slip.pdf", type: "Insurance", status: "done", pages: 12, sizeMB: 1.2, uploadedAt: "Jul 13, 09:20", uploadedBy: "A. Lindqvist", progress: 100, fieldsExtracted: 9, ocrApplied: false, format: "PDF" },
-  { id: "d7", name: "Grid_Connection_Agreement.pdf", type: "Grid Connection Agreement", status: "done", pages: 58, sizeMB: 5.6, uploadedAt: "Jul 13, 09:24", uploadedBy: "A. Lindqvist", progress: 100, fieldsExtracted: 12, ocrApplied: false, format: "PDF" },
-  { id: "d8", name: "Om_Agreement_Draft.docx", type: "O&M Agreement", status: "done", pages: 36, sizeMB: 2.8, uploadedAt: "Jul 14, 14:02", uploadedBy: "J. Moreau", progress: 100, fieldsExtracted: 11, ocrApplied: false, format: "DOCX" },
-  { id: "d9", name: "Term_Sheet_Northbridge.pdf", type: "Term Sheet", status: "done", pages: 9, sizeMB: 0.8, uploadedAt: "Jul 14, 14:05", uploadedBy: "J. Moreau", progress: 100, fieldsExtracted: 16, ocrApplied: false, format: "PDF" },
-  { id: "d10", name: "Permits_Bundle_Sevilla.pdf", type: "Permits & Licenses", status: "done", pages: 133, sizeMB: 24.1, uploadedAt: "Jul 15, 08:47", uploadedBy: "R. Chen", progress: 100, fieldsExtracted: 18, ocrApplied: true, format: "PDF" },
-  { id: "d11", name: "Environmental_Impact_Study.pdf", type: "Environmental Report", status: "extracting", pages: 187, sizeMB: 31.2, uploadedAt: "Jul 17, 16:30", uploadedBy: "R. Chen", progress: 64, fieldsExtracted: 7, ocrApplied: true, format: "PDF" },
-  { id: "d12", name: "Lender_Technical_Advisor_Scope.docx", type: "Technical Advisory", status: "classifying", pages: 15, sizeMB: 1.9, uploadedAt: "Jul 18, 09:12", uploadedBy: "A. Lindqvist", progress: 38, fieldsExtracted: 0, ocrApplied: false, format: "DOCX" },
-  { id: "d13", name: "Substation_Photos_Site_Visit.png", type: "Site Evidence", status: "parsing", pages: 1, sizeMB: 8.7, uploadedAt: "Jul 18, 09:58", uploadedBy: "J. Moreau", progress: 12, fieldsExtracted: 0, ocrApplied: true, format: "PNG" },
-  { id: "d14", name: "Investor_Presentation_Q2.pptx", type: "Sponsor Presentation", status: "done", pages: 42, sizeMB: 14.3, uploadedAt: "Jul 15, 11:21", uploadedBy: "A. Lindqvist", progress: 100, fieldsExtracted: 8, ocrApplied: false, format: "PPTX" },
+  { id: "d1", name: "Helios_PPA_Executed_vFinal.pdf", type: "Power Purchase Agreement", status: "done", pages: 84, sizeMB: 6.2, uploadedAt: "Jul 12, 10:04", uploadedBy: "J. Moreau", progress: 100, fieldsExtracted: 31, ocrApplied: false, format: "PDF", version: 2 },
+  { id: "d2", name: "EPC_Contract_SolarBond.pdf", type: "EPC Contract", status: "done", pages: 212, sizeMB: 18.4, uploadedAt: "Jul 12, 10:06", uploadedBy: "J. Moreau", progress: 100, fieldsExtracted: 47, ocrApplied: false, format: "PDF", version: 1 },
+  { id: "d3", name: "Financial_Model_v3.2.xlsx", type: "Financial Model", status: "done", pages: 1, sizeMB: 3.1, uploadedAt: "Jul 12, 10:11", uploadedBy: "R. Chen", progress: 100, fieldsExtracted: 58, ocrApplied: false, format: "XLSX", version: 3 },
+  { id: "d4", name: "Solar_Resource_Assessment_PVSyst.pdf", type: "Resource / Yield Report", status: "done", pages: 96, sizeMB: 11.8, uploadedAt: "Jul 12, 10:14", uploadedBy: "R. Chen", progress: 100, fieldsExtracted: 22, ocrApplied: false, format: "PDF", version: 1 },
+  { id: "d5", name: "Land_Lease_Andalusia.pdf", type: "Land Lease", status: "done", pages: 41, sizeMB: 4.4, uploadedAt: "Jul 12, 11:32", uploadedBy: "J. Moreau", progress: 100, fieldsExtracted: 14, ocrApplied: true, format: "PDF", version: 1 },
+  { id: "d6", name: "Insurance_Placement_Slip.pdf", type: "Insurance", status: "done", pages: 12, sizeMB: 1.2, uploadedAt: "Jul 13, 09:20", uploadedBy: "A. Lindqvist", progress: 100, fieldsExtracted: 9, ocrApplied: false, format: "PDF", version: 1 },
+  { id: "d7", name: "Grid_Connection_Agreement.pdf", type: "Grid Connection Agreement", status: "done", pages: 58, sizeMB: 5.6, uploadedAt: "Jul 13, 09:24", uploadedBy: "A. Lindqvist", progress: 100, fieldsExtracted: 12, ocrApplied: false, format: "PDF", version: 1 },
+  { id: "d8", name: "Om_Agreement_Draft.docx", type: "O&M Agreement", status: "done", pages: 36, sizeMB: 2.8, uploadedAt: "Jul 14, 14:02", uploadedBy: "J. Moreau", progress: 100, fieldsExtracted: 11, ocrApplied: false, format: "DOCX", version: 1 },
+  { id: "d9", name: "Term_Sheet_Northbridge.pdf", type: "Term Sheet", status: "done", pages: 9, sizeMB: 0.8, uploadedAt: "Jul 14, 14:05", uploadedBy: "J. Moreau", progress: 100, fieldsExtracted: 16, ocrApplied: false, format: "PDF", version: 2 },
+  { id: "d10", name: "Permits_Bundle_Sevilla.pdf", type: "Permits & Licenses", status: "done", pages: 133, sizeMB: 24.1, uploadedAt: "Jul 15, 08:47", uploadedBy: "R. Chen", progress: 100, fieldsExtracted: 18, ocrApplied: true, format: "PDF", version: 1 },
+  { id: "d11", name: "Environmental_Impact_Study.pdf", type: "Environmental Report", status: "extracting", pages: 187, sizeMB: 31.2, uploadedAt: "Jul 17, 16:30", uploadedBy: "R. Chen", progress: 64, fieldsExtracted: 7, ocrApplied: true, format: "PDF", version: 1 },
+  { id: "d12", name: "Lender_Technical_Advisor_Scope.docx", type: "Technical Advisory", status: "classifying", pages: 15, sizeMB: 1.9, uploadedAt: "Jul 18, 09:12", uploadedBy: "A. Lindqvist", progress: 38, fieldsExtracted: 0, ocrApplied: false, format: "DOCX", version: 1 },
+  { id: "d13", name: "Substation_Photos_Site_Visit.png", type: "Site Evidence", status: "parsing", pages: 1, sizeMB: 8.7, uploadedAt: "Jul 18, 09:58", uploadedBy: "J. Moreau", progress: 12, fieldsExtracted: 0, ocrApplied: true, format: "PNG", version: 1 },
+  { id: "d14", name: "Investor_Presentation_Q2.pptx", type: "Sponsor Presentation", status: "done", pages: 42, sizeMB: 14.3, uploadedAt: "Jul 15, 11:21", uploadedBy: "A. Lindqvist", progress: 100, fieldsExtracted: 8, ocrApplied: false, format: "PPTX", version: 2 },
 ];
 
 // ── Canonical fields (Project Helios) ───────────────────────

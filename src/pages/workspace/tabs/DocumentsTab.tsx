@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { CheckCircle2, ChevronDown, FileUp, Loader2, Play, ScanText } from "lucide-react";
+import { CheckCircle2, ChevronDown, Download, FileUp, Loader2, Play, ScanText } from "lucide-react";
 import type { DealDocument } from "../../../lib/mockData";
 import { PIPELINE_STAGES, useStore } from "../../../lib/store";
 import { Badge, Button, Card, SourceChip } from "../../../lib/ui";
@@ -177,14 +177,41 @@ function DocumentsTable({
   open: string | null;
   setOpen: (id: string | null) => void;
 }) {
+  const [selected, setSelected] = useState<Set<string>>(new Set(documents.map((d) => d.id)));
+  const allSelected = documents.length > 0 && selected.size === documents.length;
+  const noneSelected = selected.size === 0;
+
+  function toggleAll() {
+    setSelected(allSelected ? new Set() : new Set(documents.map((d) => d.id)));
+  }
+  function toggleOne(id: string) {
+    setSelected((s) => {
+      const next = new Set(s);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
   return (
     <Card pad={false} className="overflow-hidden">
+      <div className="flex items-center justify-between border-b border-ink-100 px-5 py-3">
+        <p className="text-[12.5px] text-ink-500"><span className="num font-semibold text-ink-900">{selected.size}</span> of {documents.length} selected</p>
+        <Button
+          variant="secondary"
+          className={cn("px-3 py-1.5 text-[12px]", noneSelected && "pointer-events-none opacity-40")}
+        >
+          <Download size={13} /> Download selected ({selected.size})
+        </Button>
+      </div>
       <table className="w-full text-left">
         <thead>
           <tr className="border-b border-ink-100 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-400">
-            <th className="px-5 py-3">Document</th>
+            <th className="w-10 px-5 py-3">
+              <input type="checkbox" checked={allSelected} onChange={toggleAll} className="h-3.5 w-3.5 rounded border-ink-300 accent-accent-600" />
+            </th>
+            <th className="px-4 py-3">Document</th>
             <th className="px-4 py-3">Classified type</th>
-            <th className="px-4 py-3">Pages / size</th>
+            <th className="px-4 py-3">Pages / version</th>
             <th className="px-4 py-3">Uploaded</th>
             <th className="px-4 py-3">Fields</th>
             <th className="px-5 py-3">Status</th>
@@ -193,7 +220,10 @@ function DocumentsTable({
         </thead>
         <tbody className="divide-y divide-ink-100">
           {documents.map((d) => (
-            <DocRow key={d.id} d={d} open={open === d.id} onToggle={() => setOpen(open === d.id ? null : d.id)} />
+            <DocRow
+              key={d.id} d={d} open={open === d.id} onToggle={() => setOpen(open === d.id ? null : d.id)}
+              checked={selected.has(d.id)} onToggleChecked={() => toggleOne(d.id)}
+            />
           ))}
         </tbody>
       </table>
@@ -201,28 +231,33 @@ function DocumentsTable({
   );
 }
 
-function DocRow({ d, open, onToggle }: { d: DealDocument; open: boolean; onToggle: () => void }) {
+function DocRow({
+  d, open, onToggle, checked, onToggleChecked,
+}: { d: DealDocument; open: boolean; onToggle: () => void; checked: boolean; onToggleChecked: () => void }) {
   const samples = sampleExtractions[d.id];
   return (
     <>
-      <tr onClick={onToggle} className="cursor-pointer transition-colors hover:bg-ink-50">
-        <td className="px-5 py-3">
+      <tr className="transition-colors hover:bg-ink-50">
+        <td className="px-5 py-3" onClick={(e) => e.stopPropagation()}>
+          <input type="checkbox" checked={checked} onChange={onToggleChecked} className="h-3.5 w-3.5 rounded border-ink-300 accent-accent-600" />
+        </td>
+        <td className="cursor-pointer px-4 py-3" onClick={onToggle}>
           <div className="flex items-center gap-2.5">
             <span className={cn("rounded border px-1.5 py-0.5 text-[10px] font-bold", fmtChip)}>{d.format}</span>
             <span className="max-w-[280px] truncate text-[13px] font-medium">{d.name}</span>
             {d.ocrApplied && <Badge tone="gray">OCR</Badge>}
           </div>
         </td>
-        <td className="px-4 py-3">{d.status === "done" ? <Badge tone="blue">{d.type}</Badge> : <span className="text-[12px] text-ink-400">{d.status === "classifying" ? "detecting…" : d.status === "uploading" ? "—" : d.type}</span>}</td>
-        <td className="num px-4 py-3 text-[12px] text-ink-500">{d.pages}p · {d.sizeMB}MB</td>
-        <td className="px-4 py-3 text-[12px] text-ink-500">{d.uploadedBy}<br /><span className="text-ink-400">{d.uploadedAt}</span></td>
-        <td className="num px-4 py-3 text-[12.5px] font-medium">{d.fieldsExtracted > 0 ? d.fieldsExtracted : "—"}</td>
-        <td className="px-5 py-3"><StatusCell d={d} /></td>
-        <td className="pr-4"><ChevronDown size={14} className={cn("text-ink-400 transition-transform", open && "rotate-180")} /></td>
+        <td className="cursor-pointer px-4 py-3" onClick={onToggle}>{d.status === "done" ? <Badge tone="blue">{d.type}</Badge> : <span className="text-[12px] text-ink-400">{d.status === "classifying" ? "detecting…" : d.status === "uploading" ? "—" : d.type}</span>}</td>
+        <td className="num cursor-pointer px-4 py-3 text-[12px] text-ink-500" onClick={onToggle}>{d.pages}p · v{d.version}</td>
+        <td className="cursor-pointer px-4 py-3 text-[12px] text-ink-500" onClick={onToggle}>{d.uploadedBy}<br /><span className="text-ink-400">{d.uploadedAt}</span></td>
+        <td className="num cursor-pointer px-4 py-3 text-[12.5px] font-medium" onClick={onToggle}>{d.fieldsExtracted > 0 ? d.fieldsExtracted : "—"}</td>
+        <td className="cursor-pointer px-5 py-3" onClick={onToggle}><StatusCell d={d} /></td>
+        <td className="cursor-pointer pr-4" onClick={onToggle}><ChevronDown size={14} className={cn("text-ink-400 transition-transform", open && "rotate-180")} /></td>
       </tr>
       {open && (
         <tr className="bg-ink-50/50">
-          <td colSpan={7} className="px-5 py-4">
+          <td colSpan={8} className="px-5 py-4">
             <div className="flex flex-wrap gap-6">
               <div>
                 <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-400">Extraction passes</p>

@@ -135,7 +135,7 @@ interface Store extends Data {
   addFieldManually: (id: string, value: string) => void;
   resolveConflict: (id: string, chosen: { value: string; source: string; page?: number; snippet?: string; confidence?: number }, note: string) => void;
   reopenConflict: (id: string) => void;
-  escalateConflict: (id: string) => void;
+  escalateConflict: (id: string, to: string) => void;
   dismissValidationFlag: (id: string) => void;
   createActionItemFromFlag: (id: string) => void;
   openSourceDrawer: (payload: SourceDrawerPayload) => void;
@@ -266,17 +266,17 @@ export const useStore = create<Store>()(
         get().showToast("Conflict reopened");
       },
 
-      escalateConflict: (id) => {
+      escalateConflict: (id, to) => {
         const conflict = get().conflicts.find((c) => c.id === id);
         if (conflict) {
           set((s) => ({
             actionItems: [
-              { id: `esc-${id}`, text: `Escalated: ${conflict.field} conflict needs Principal sign-off`, owner: "S. Okafor", due: "TBD", done: false, source: "Reconciliation" },
+              { id: `esc-${id}`, text: `Escalated: ${conflict.field} conflict needs ${to}'s sign-off`, owner: to, due: "TBD", done: false, source: "Reconciliation" },
               ...s.actionItems,
             ],
           }));
+          get().showToast(`Notified ${to} about ${conflict.field} conflict`);
         }
-        get().showToast("Escalated to Principal");
       },
 
       dismissValidationFlag: (id) => {

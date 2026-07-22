@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ArrowUpRight, FileUp, MessageSquareText, Plus, Sun, Wind, Building2, AlertTriangle } from "lucide-react";
+import { ArrowUpRight, FileText, FileUp, MessageSquareText, Plus, Sun, Wind, Building2, AlertTriangle } from "lucide-react";
+import type { Technology } from "../lib/mockData";
 import { useStore } from "../lib/store";
 import { Badge, Card, CardHeader, Stat } from "../lib/ui";
 import { cn } from "../lib/cn";
 
 const techIcon = { Solar: Sun, Wind: Wind, Infrastructure: Building2 };
+const dealTypes: Technology[] = ["Solar", "Wind", "Infrastructure"];
 const statusTone: Record<string, "blue" | "orange" | "green" | "gray"> = {
   "In Diligence": "blue", "IC Review": "orange", Approved: "green", Passed: "gray", Closed: "green",
 };
@@ -22,6 +25,11 @@ const activity = [
 export default function Dashboard() {
   const projects = useStore((s) => s.projects);
   const knowledgeGrowth = useStore((s) => s.knowledgeGrowth);
+  const lastTwo = knowledgeGrowth.slice(-2);
+  const dealsGrowthPct = lastTwo.length === 2 && lastTwo[0].deals > 0
+    ? Math.round(((lastTwo[1].deals - lastTwo[0].deals) / lastTwo[0].deals) * 100)
+    : 0;
+  const [typeFilter, setTypeFilter] = useState<Technology | null>(null);
   return (
     <div className="mx-auto max-w-[1200px] px-6 py-6">
       {/* Header */}
@@ -37,14 +45,16 @@ export default function Dashboard() {
           <Link to="/projects/new" className="inline-flex items-center gap-1.5 rounded-lg bg-accent-600 px-3.5 py-2 text-[13px] font-medium text-white hover:bg-accent-700">
             <Plus size={15} /> New Deal
           </Link>
+          <button className="inline-flex items-center gap-1.5 rounded-lg bg-accent-600 px-3.5 py-2 text-[13px] font-medium text-white hover:bg-accent-700">
+            <FileText size={15} /> Draft a term sheet
+          </button>
         </div>
       </div>
 
       {/* KPI row */}
-      <div className="mb-6 grid grid-cols-4 gap-4 fade-up">
+      <div className="mb-6 grid grid-cols-3 gap-4 fade-up">
         <Card><Stat label="Active deals" value="4" sub="+2 this quarter" trend="up" /></Card>
         <Card><Stat label="In IC review" value="1" sub="Boreas · memo draft" /></Card>
-        <Card><Stat label="Canonical fields" value="9,640" sub="across 19 deals" trend="up" /></Card>
         <Card><Stat label="Open conflicts" value="11" sub="4 on Project Helios" trend="down" /></Card>
       </div>
 
@@ -58,8 +68,25 @@ export default function Dashboard() {
                 View all <ArrowUpRight size={13} />
               </Link>
             </div>
+            <div className="flex flex-wrap gap-1.5 px-5 pb-3">
+              <button
+                onClick={() => setTypeFilter(null)}
+                className={cn("rounded-md border px-2.5 py-1 text-[11.5px] font-medium transition-colors", !typeFilter ? "border-ink-900 bg-ink-900 text-white" : "border-ink-200 text-ink-600 hover:border-ink-300")}
+              >
+                All types
+              </button>
+              {dealTypes.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTypeFilter(typeFilter === t ? null : t)}
+                  className={cn("rounded-md border px-2.5 py-1 text-[11.5px] font-medium transition-colors", typeFilter === t ? "border-ink-900 bg-ink-900 text-white" : "border-ink-200 text-ink-600 hover:border-ink-300")}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
             <div className="divide-y divide-ink-100">
-              {projects.filter((p) => p.status !== "Passed").map((p) => {
+              {projects.filter((p) => p.status !== "Passed" && (!typeFilter || p.technology === typeFilter)).map((p) => {
                 const Icon = techIcon[p.technology];
                 const docPct = Math.round((p.docsUploaded / p.docsTotal) * 100);
                 const fieldPct = Math.round((p.fieldsConfirmed / p.fieldsTotal) * 100);
@@ -96,8 +123,8 @@ export default function Dashboard() {
           <Card>
             <CardHeader
               title="Firm knowledge growth"
-              sub="Canonical fields extracted across all deals — compounding with every transaction"
-              right={<Badge tone="green">+24% this month</Badge>}
+              sub="Deals completed across the firm — compounding with every transaction"
+              right={<Badge tone="green">+{dealsGrowthPct}% this month</Badge>}
             />
             <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -106,7 +133,7 @@ export default function Dashboard() {
                   <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#8a93a6" }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: "#8a93a6" }} axisLine={false} tickLine={false} />
                   <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #dde1e9" }} />
-                  <Area type="monotone" dataKey="fields" stroke="#0e5f45" strokeWidth={2} fill="#0e5f45" fillOpacity={0.08} />
+                  <Area type="monotone" dataKey="deals" stroke="#0e5f45" strokeWidth={2} fill="#0e5f45" fillOpacity={0.08} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

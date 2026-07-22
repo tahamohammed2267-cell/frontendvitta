@@ -99,7 +99,7 @@ export function buildSearchIndex(): SearchResult[] {
   const risk = risks.find((r) => r.id === "r1");
   if (risk) {
     results.push({
-      type: "Risk", title: risk.title, to: "/projects/helios?tab=intelligence",
+      type: "Risk", title: risk.title, to: "/projects/helios?tab=reconciliation",
       snippet: `Executed PPA prices energy at ${mark("€52.40/MWh")} while the lender term sheet assumes a €54.00/MWh floor…`,
       src: risk.evidence[1]?.doc ?? risk.evidence[0].doc, page: risk.evidence[1]?.page ?? risk.evidence[0].page, priority: priority.Risk,
     });

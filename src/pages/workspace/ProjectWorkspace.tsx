@@ -7,7 +7,6 @@ import OverviewTab from "./tabs/OverviewTab";
 import DocumentsTab from "./tabs/DocumentsTab";
 import ExtractionTab from "./tabs/ExtractionTab";
 import ReconciliationTab from "./tabs/ReconciliationTab";
-import IntelligenceTab from "./tabs/IntelligenceTab";
 import ChecklistTab from "./tabs/ChecklistTab";
 import OutputsTab from "./tabs/OutputsTab";
 import DownloadsTab from "./tabs/DownloadsTab";
@@ -27,10 +26,9 @@ export default function ProjectWorkspace() {
     { id: "documents", label: "Documents", count: documents.length },
     { id: "extraction", label: "Data Extraction" },
     { id: "reconciliation", label: "Reconciliation", count: conflicts.filter((c) => c.status === "open").length, warn: true },
-    { id: "intelligence", label: "Intelligence" },
     { id: "checklist", label: "Checklist", count: checklist.filter((c) => c.status !== "present").length, warn: true },
     { id: "outputs", label: "Outputs" },
-    { id: "downloads", label: "Downloads" },
+    { id: "downloads", label: "Project VDR" },
   ];
 
   return (
@@ -98,7 +96,6 @@ export default function ProjectWorkspace() {
           {tab === "documents" && <DocumentsTab />}
           {tab === "extraction" && <ExtractionTab />}
           {tab === "reconciliation" && <ReconciliationTab />}
-          {tab === "intelligence" && <IntelligenceTab />}
           {tab === "checklist" && <ChecklistTab />}
           {tab === "outputs" && <OutputsTab />}
           {tab === "downloads" && <DownloadsTab />}
