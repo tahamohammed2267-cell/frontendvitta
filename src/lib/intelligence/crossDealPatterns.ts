@@ -13,18 +13,21 @@
 // ─────────────────────────────────────────────────────────────
 
 import {
-  industries, portfolioProjects, regionalRisks, regions,
+  findProject, industries, portfolioProjects, regionalRisks, regions,
   type HealthFlagRule, type IndustryKey, type Severity,
 } from "../portfolioData";
 
 export interface PatternDealHit {
-  projectId: string;
+  kind: "project" | "region";
+  projectId: string; // project id for kind:"project", region id for kind:"region"
   projectName: string;
+  companyId?: string; // only present for kind:"project" — needed to build the real workspace link
   industryKey: IndustryKey;
   regionId: string;
   regionName: string;
   severity: Severity;
-  detail: string;
+  detail: string; // the real source text this hit is drawn from (HealthFlag.detail or RegionalRisk.text)
+  sourceLabel: string; // what kind of record `detail` came from, e.g. "Health flag" / "Regional risk note"
 }
 
 export interface CrossDealPattern {
@@ -57,9 +60,9 @@ function buildFlagPatterns(): CrossDealPattern[] {
   for (const p of portfolioProjects) {
     for (const flag of p.healthFlags) {
       const hit: PatternDealHit = {
-        projectId: p.id, projectName: p.name, industryKey: p.industryKey,
+        kind: "project", projectId: p.id, projectName: p.name, companyId: p.companyId, industryKey: p.industryKey,
         regionId: p.regionId, regionName: regionName(p.regionId),
-        severity: flag.severity, detail: flag.detail,
+        severity: flag.severity, detail: flag.detail, sourceLabel: "Health flag",
       };
       byRule.set(flag.rule, [...(byRule.get(flag.rule) ?? []), hit]);
     }
@@ -92,10 +95,10 @@ function buildRegionalRiskPattern(): CrossDealPattern | null {
   const hits: PatternDealHit[] = entries.map((e) => {
     const region = regions.find((r) => r.id === e.regionId);
     return {
-      projectId: e.regionId, projectName: region?.name ?? e.regionId,
+      kind: "region" as const, projectId: e.regionId, projectName: region?.name ?? e.regionId,
       industryKey: (region?.industryKey ?? "solar") as IndustryKey,
       regionId: e.regionId, regionName: region?.name ?? e.regionId,
-      severity: e.severity, detail: e.text,
+      severity: e.severity, detail: e.text, sourceLabel: "Regional risk note",
     };
   });
   const severityCounts: Record<Severity, number> = { critical: 0, high: 0, medium: 0, low: 0 };
@@ -125,4 +128,16 @@ export const crossDealPatterns: CrossDealPattern[] = [...buildFlagPatterns(), bu
 
 export function industryLabel(key: IndustryKey) {
   return industries.find((i) => i.key === key)?.name ?? key;
+}
+
+// Real navigable link for a hit — a project workspace when the hit is a
+// real project, a region dashboard when it's a regional-risk hit. Shared
+// by both the (legacy) pattern table and the new Institutional Signals cards.
+export function hitWorkspaceLink(h: PatternDealHit): string | null {
+  if (h.kind === "project") {
+    const project = findProject(h.projectId);
+    if (!project) return null;
+    return `/portfolio/${project.industryKey}/${project.regionId}/${project.companyId}/${project.id}`;
+  }
+  return `/portfolio/${h.industryKey}/${h.regionId}`;
 }
