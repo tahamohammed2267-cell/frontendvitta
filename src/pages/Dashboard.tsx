@@ -60,7 +60,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-3 gap-4">
         {/* Active deals */}
-        <div className="col-span-2 space-y-4 fade-up">
+        <div className="col-span-2 flex flex-col gap-4 fade-up">
           <Card pad={false}>
             <div className="flex items-center justify-between px-5 pt-4 pb-3">
               <h3 className="text-[15px] font-semibold tracking-tight">Active deals</h3>
@@ -120,13 +120,12 @@ export default function Dashboard() {
           </Card>
 
           {/* Knowledge growth */}
-          <Card>
+          <Card className="flex flex-1 flex-col">
             <CardHeader
               title="Firm knowledge growth"
-              sub="Deals completed across the firm — compounding with every transaction"
               right={<Badge tone="green">+{dealsGrowthPct}% this month</Badge>}
             />
-            <div className="h-[200px]">
+            <div className="min-h-[200px] flex-1">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={knowledgeGrowth} margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>
                   <CartesianGrid strokeDasharray="none" stroke="#f5f5f4" vertical={false} />
@@ -143,7 +142,7 @@ export default function Dashboard() {
         {/* Right column */}
         <div className="space-y-4 fade-up">
           <Card>
-            <CardHeader title="Ask vitta" sub="Across every deal, document and field" />
+            <CardHeader title="Ask vitta" />
             <Link to="/search" className="flex items-center gap-2 rounded-lg border border-ink-200 bg-ink-50 px-3 py-2.5 text-[12.5px] text-ink-400 hover:border-ink-300">
               <MessageSquareText size={14} className="text-accent-600" /> Compare Helios to past solar deals…
             </Link>
@@ -155,7 +154,7 @@ export default function Dashboard() {
           </Card>
 
           <Card>
-            <CardHeader title="Open risks by severity" sub="Across active deals" />
+            <CardHeader title="Open risks by severity" />
             <div className="space-y-2.5">
               {[
                 { label: "Critical", n: 3, color: "bg-crit-600", w: "30%" },

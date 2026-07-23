@@ -73,7 +73,7 @@ export default function IndustryDashboard() {
           </Card>
 
           <Card>
-            <CardHeader title="Financial KPIs" sub="Topline, earnings and cost breakdown" />
+            <CardHeader title="Financial KPIs" />
             <SectionLabel>Topline</SectionLabel>
             <div className="mb-4 grid grid-cols-3 gap-3">
               <MiniStat label="Revenue" value={`€${summary.totalRevenueM}m`} />
@@ -91,7 +91,7 @@ export default function IndustryDashboard() {
           </Card>
 
           <Card>
-            <CardHeader title="Region comparison" sub="Revenue by region" right={<Link to="/portfolio" className="flex items-center gap-1 text-[12.5px] font-medium text-accent-600">All regions <ArrowUpRight size={13} /></Link>} />
+            <CardHeader title="Region comparison" right={<Link to="/portfolio" className="flex items-center gap-1 text-[12.5px] font-medium text-accent-600">All regions <ArrowUpRight size={13} /></Link>} />
             <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={regionRows.map((r) => ({ name: r.region.name, revenue: r.summary.totalRevenueM }))} margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>

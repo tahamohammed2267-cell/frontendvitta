@@ -32,7 +32,7 @@ export default function InsightsPanel({ scope, limit = 4 }: { scope?: string; li
 
   return (
     <Card>
-      <CardHeader title="Intelligence insights" sub="Generated from portfolio performance data" right={<Lightbulb size={15} className="text-accent-600" />} />
+      <CardHeader title="Intelligence insights" right={<Lightbulb size={15} className="text-accent-600" />} />
       <div className="stagger space-y-2">
         {rows.map((i, idx) => {
           const t = tone[i.tone];

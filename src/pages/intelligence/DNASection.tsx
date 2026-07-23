@@ -24,7 +24,6 @@ export default function DNASection() {
       <div id={anchorId("dna", dealId)} />
       <CardHeader
         title="Investment DNA"
-        sub="A profile of what the firm actually knows about each deal, scored across dimensions with real backing evidence"
         right={<Badge tone={confidenceTone[dna.overallConfidence]}>{dna.overallConfidence} overall confidence</Badge>}
       />
 

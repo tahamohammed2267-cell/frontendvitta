@@ -53,7 +53,7 @@ export default function CountryDashboard() {
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2 space-y-4 fade-up">
           <Card>
-            <CardHeader title="Financial KPIs" sub="Topline, earnings and cash flow across all industries in this region" />
+            <CardHeader title="Financial KPIs" />
             <SectionLabel>Topline</SectionLabel>
             <div className="mb-4 grid grid-cols-3 gap-3">
               <MiniStat label="Revenue" value={`€${summary.totalRevenueM}m`} />

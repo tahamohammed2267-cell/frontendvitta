@@ -137,7 +137,7 @@ export default function PortfolioHome() {
 
           {/* Attention */}
           <Card pad={false}>
-            <div className="border-b border-ink-100 px-5 py-4"><CardHeader title="Projects requiring attention" sub="Top of the Health Center triage list" /></div>
+            <div className="border-b border-ink-100 px-5 py-4"><CardHeader title="Projects requiring attention" /></div>
             <div className="divide-y divide-ink-100">
               {attention.slice(0, 5).map(({ project, flags }) => (
                 <Link

@@ -5,7 +5,7 @@ import { Card, CardHeader } from "../../../lib/ui";
 export default function AuditTrailPanel({ entries }: { entries: AuditEntry[] }) {
   return (
     <Card>
-      <CardHeader title="Audit trail" sub="Every MIS upload and version change" right={<History size={15} className="text-ink-400" />} />
+      <CardHeader title="Audit trail" right={<History size={15} className="text-ink-400" />} />
       <div className="space-y-3">
         {entries.map((e) => (
           <div key={e.id} className="flex gap-2.5">

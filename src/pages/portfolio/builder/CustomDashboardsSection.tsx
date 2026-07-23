@@ -24,7 +24,7 @@ export default function CustomDashboardsSection({ scope, scopeId }: { scope: Das
   if (dashboards.length === 0) {
     return (
       <Card>
-        <CardHeader title="Custom dashboards" sub="Build your own view of this scope" right={<Button variant="secondary" className="px-2.5 py-1.5 text-[12px]" onClick={handleCreate}>Create dashboard</Button>} />
+        <CardHeader title="Custom dashboards" right={<Button variant="secondary" className="px-2.5 py-1.5 text-[12px]" onClick={handleCreate}>Create dashboard</Button>} />
         <p className="text-[12.5px] text-ink-400">No custom dashboards yet.</p>
       </Card>
     );

@@ -10,9 +10,9 @@ import { cn } from "../lib/cn";
 // Contextual "next step" actions surfaced under the latest answer — the
 // agentic pattern: an answer that also proposes what to do with it.
 const FOLLOW_UPS = [
-  { icon: Table2, label: "Show the underlying figures", query: "Show me the underlying figures behind that." },
-  { icon: GitCompareArrows, label: "Compare to sector benchmark", query: "How does that compare to the sector benchmark?" },
-  { icon: FileText, label: "Draft a summary memo", query: "Draft a short summary memo of that." },
+  { icon: FileText, label: "What are the biggest risks?", query: "What are the biggest risks on this deal?" },
+  { icon: GitCompareArrows, label: "Compare to precedent deals", query: "How does this compare to precedent solar deals?" },
+  { icon: Table2, label: "Summarize in 5 bullets", query: "Summarize this deal in 5 bullet points" },
 ];
 
 export default function ChatPanel({ context, screen }: { context: "firm" | "project"; screen: string }) {

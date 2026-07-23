@@ -10,7 +10,6 @@ export default function KnowledgeGrowthPanel() {
     <Card>
       <CardHeader
         title="Continuous learning"
-        sub="Illustrative coverage growth, based on the firm's actual deal intake pace — not a live feed"
         right={<Badge tone="gray">{latest.deals} deals · {latest.observations} observations · {latest.decisions} decisions</Badge>}
       />
       <AreaTrend

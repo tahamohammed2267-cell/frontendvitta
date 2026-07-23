@@ -35,7 +35,7 @@ export default function DecisionsSection() {
 
   return (
     <Card>
-      <CardHeader title="Investment Decisions" sub="The full institutional decision history — rationale, participants, assumptions and outcomes" />
+      <CardHeader title="Investment Decisions" />
       <div className="space-y-3">
         {icDecisions.map((d) => {
           const project = projects.find((p) => p.id === d.dealId);

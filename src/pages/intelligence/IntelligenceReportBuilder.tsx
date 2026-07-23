@@ -21,7 +21,7 @@ export default function IntelligenceReportBuilder() {
 
   return (
     <Card>
-      <CardHeader title="Generate an institutional report" sub="Combine decisions, analyst intelligence, playbooks, recommendations and lessons into one document" />
+      <CardHeader title="Generate an institutional report" />
 
       <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-400">Deal</p>
       <div className="mb-4 flex flex-wrap gap-1.5">

@@ -53,7 +53,7 @@ export default function AnalystIntelligenceSection() {
 
   return (
     <Card>
-      <CardHeader title="Analyst Intelligence" sub="Notes, highlights, questions and flags — reusable institutional knowledge, not filed away per document" />
+      <CardHeader title="Analyst Intelligence" />
 
       <div className="mb-3 flex flex-wrap gap-1.5">
         <button

@@ -119,7 +119,7 @@ export default function ComparisonView() {
 
       {/* Metric selector */}
       <Card className="mb-4 fade-up">
-        <CardHeader title="Metrics" sub="Toggle metrics to compare — changes apply immediately" />
+        <CardHeader title="Metrics" />
         <div className="space-y-3">
           {categoryOrder.map((cat) => {
             const keys = metricsByCategory.get(cat) ?? [];
@@ -184,7 +184,7 @@ export default function ComparisonView() {
 
       {/* Comparison table */}
       <Card pad={false} className="mt-4">
-        <div className="border-b border-ink-100 px-5 py-4"><CardHeader title="Comparison table" sub="Metrics × entities" /></div>
+        <div className="border-b border-ink-100 px-5 py-4"><CardHeader title="Comparison table" /></div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>

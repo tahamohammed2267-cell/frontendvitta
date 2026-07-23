@@ -16,7 +16,7 @@ export default function FinancialsTab({ project: proj }: { project: PortfolioPro
       </div>
 
       <Card>
-        <CardHeader title="Historical trends" sub="Revenue, last 6 months" />
+        <CardHeader title="Historical trends" />
         <div className="h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={proj.financials.topline.byMonth} margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>

@@ -94,7 +94,7 @@ export default function RegionDashboard() {
           </Card>
 
           <Card>
-            <CardHeader title="Project distribution" sub="By operational status" />
+            <CardHeader title="Project distribution" />
             <div className="flex items-center gap-6">
               <div className="h-[160px] w-[160px] shrink-0">
                 <ResponsiveContainer width="100%" height="100%">
@@ -158,7 +158,7 @@ export default function RegionDashboard() {
         <div className="space-y-4 fade-up">
           <InsightsPanel scope={reg.id} limit={3} />
           <Card>
-            <CardHeader title="Regional risks" sub="Weather, regulatory, grid, inflation, currency" />
+            <CardHeader title="Regional risks" />
             <div className="space-y-2.5">
               {risks.map((r, i) => (
                 <div key={i} className="rounded-lg border border-ink-100 p-3">

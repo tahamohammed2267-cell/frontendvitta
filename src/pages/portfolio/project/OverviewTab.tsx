@@ -54,7 +54,7 @@ export default function OverviewTab({
           )}
 
           <Card>
-            <CardHeader title="Operational metrics" sub={`${ind.sector} business drivers`} right={<Link to="?tab=business-drivers" className="text-[12.5px] font-medium text-accent-600">All <ArrowUpRight size={13} className="inline" /></Link>} />
+            <CardHeader title="Operational metrics" right={<Link to="?tab=business-drivers" className="text-[12.5px] font-medium text-accent-600">All <ArrowUpRight size={13} className="inline" /></Link>} />
             <div className="grid grid-cols-3 gap-3">
               {proj.drivers.metrics.map((m) => (
                 <div key={m.label} className="rounded-lg border border-ink-100 p-3">
@@ -67,7 +67,7 @@ export default function OverviewTab({
           </Card>
 
           <Card>
-            <CardHeader title="Financial performance" sub="Revenue trend, last 6 months" right={<Link to="?tab=financials" className="text-[12.5px] font-medium text-accent-600">Full financials <ArrowUpRight size={13} className="inline" /></Link>} />
+            <CardHeader title="Financial performance" right={<Link to="?tab=financials" className="text-[12.5px] font-medium text-accent-600">Full financials <ArrowUpRight size={13} className="inline" /></Link>} />
             <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={proj.financials.topline.byMonth} margin={{ top: 4, right: 4, bottom: 0, left: -18 }}>
@@ -103,7 +103,7 @@ export default function OverviewTab({
           </Card>
 
           <Card>
-            <CardHeader title="Asset health" sub="Equipment status and maintenance schedule" right={<Link to="?tab=asset-health" className="text-[12.5px] font-medium text-accent-600">Full view <ArrowUpRight size={13} className="inline" /></Link>} />
+            <CardHeader title="Asset health" right={<Link to="?tab=asset-health" className="text-[12.5px] font-medium text-accent-600">Full view <ArrowUpRight size={13} className="inline" /></Link>} />
             <div className="space-y-2">
               {proj.assetHealth.equipment.map((eq) => (
                 <div key={eq.name} className="flex items-center gap-3 rounded-lg border border-ink-100 p-3">
@@ -183,7 +183,7 @@ export default function OverviewTab({
 
           {proj.linkedDealId && (
             <Card>
-              <CardHeader title="Source deal" sub="This project originated from an approved diligence workspace" />
+              <CardHeader title="Source deal" />
               <Badge tone="gray">{proj.name}</Badge>
               <Link to={`/projects/${proj.linkedDealId}`} className="mt-3 block text-center text-[12.5px] font-medium text-accent-600 hover:underline">Open diligence workspace</Link>
             </Card>

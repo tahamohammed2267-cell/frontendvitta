@@ -19,7 +19,7 @@ export default function RecommendationsPanel() {
 
   return (
     <Card>
-      <CardHeader title="AI Recommendations" sub="Proactive, evidence-grounded — every recommendation cites the institutional knowledge behind it" />
+      <CardHeader title="AI Recommendations" />
 
       <div className="mb-4 flex flex-wrap gap-1.5">
         {projects.map((p) => (

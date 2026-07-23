@@ -103,11 +103,39 @@ export const chatReplies: ChatReply[] = [
     keywords: ["compare", "benchmark", "precedent", "similar"],
     text: "Against 17 comparable Iberian solar precedents in the firm's knowledge base, Helios's CAPEX per MWp sits in range (€0.80M vs €0.72–0.86M P25–P75), but the PPA tariff sits below the P25 comparable (€52.40 vs €61–70/MWh). Iberian PPA tariffs are trending down ~6% quarter-on-quarter across the book, which may explain some of the gap.",
   },
+  {
+    keywords: ["ebitda", "margin", "earnings"],
+    text: "EBITDA appears in three places: the financial model, the lender base case and the IC memo draft. Year-1 EBITDA is €7.9M at a ~82% margin, and the three sources reconcile to within 1% [1][2]. The margin steps up over the PPA term as the €52.40/MWh tariff escalates 1.8% a year.",
+    citations: [
+      { n: 1, doc: "Financial_Model_Helios_v4.xlsx", page: 3 },
+      { n: 2, doc: "IC_Memo_Draft.docx", page: 6 },
+    ],
+  },
+  {
+    keywords: ["contract", "longer than", "10 year", "10 years", "tenor", "term longer"],
+    text: "Three agreements run beyond a 10-year term: the O&M agreement (15-year, still in draft), the land lease (25-year), and the grid connection agreement (20-year) [1][2]. The PPA sits right at 10 years, and the EPC with SolarBond is construction-term only.",
+    citations: [
+      { n: 1, doc: "Om_Agreement_Draft.docx", page: 2 },
+      { n: 2, doc: "Land_Lease_Andalusia.pdf", page: 8 },
+    ],
+  },
+  {
+    keywords: ["sponsor", "ic question", "ic questions", "diligence question"],
+    text: "Five I'd put to the sponsor before IC: (1) reconcile the executed PPA tariff (€52.40/MWh) against the €54.00 term-sheet floor and confirm the DSCR impact in Years 3–5 [1][2]; (2) timeline to sign the O&M agreement and lock the €11.2k/MWp/yr cost; (3) curtailment assumptions versus the 2.1% regional actual; (4) confirmation the CAPEX conflict is closed at €96.4M per the EPC; (5) refinancing plan at PPA expiry.",
+    citations: [
+      { n: 1, doc: "Helios_PPA_Executed_vFinal.pdf", page: 22 },
+      { n: 2, doc: "Term_Sheet_Northbridge.pdf", page: 5 },
+    ],
+  },
 ];
 
 export const defaultReply: ChatReply = {
   keywords: [],
-  text: "I don't have a scripted answer for that exact question in this demo, but across the deal I can confirm: €96.4M CAPEX, €52.40/MWh PPA, 11.8% levered equity IRR, and three open risk items (O&M draft, curtailment, and the now-resolved CAPEX conflict). Try one of the suggested prompts for a fuller answer.",
+  text: "Here's what I can confirm on Project Helios: €96.4M CAPEX, an executed 10-year PPA at €52.40/MWh, 11.8% levered equity IRR and 1.30x minimum DSCR, with three open items — the draft O&M agreement, unquantified curtailment, and the now-resolved CAPEX conflict. Every figure links back to its source document if you want to drill in.",
+  citations: [
+    { n: 1, doc: "IC_Memo_Draft.docx", page: 6 },
+    { n: 2, doc: "Helios_PPA_Executed_vFinal.pdf", page: 22 },
+  ],
 };
 
 export function pickReply(question: string): ChatReply {

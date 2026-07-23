@@ -22,7 +22,7 @@ export default function PlaybooksSection() {
 
   return (
     <Card>
-      <CardHeader title="Institutional Playbooks" sub="Sector knowledge that evolves automatically as more deals are completed" />
+      <CardHeader title="Institutional Playbooks" />
       <div className="grid grid-cols-3 gap-3 max-lg:grid-cols-1">
         {playbooks.map((pb) => (
           <div key={pb.id} className="flex flex-col justify-between rounded-lg border border-ink-100 p-4">

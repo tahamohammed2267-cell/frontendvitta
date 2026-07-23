@@ -133,7 +133,7 @@ export default function HealthCenter() {
       {healthDash && (
         <Card pad={false} className="mt-4 fade-up">
           <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
-            <CardHeader title={healthDash.name} sub="Custom command-center dashboard" />
+            <CardHeader title={healthDash.name} />
             <Link to={`/portfolio/dashboards/${healthDash.id}/edit`}>
               <Button variant="secondary" className="px-2.5 py-1.5 text-[12px]"><Pencil size={12} /> Edit</Button>
             </Link>

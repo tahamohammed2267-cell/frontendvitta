@@ -34,7 +34,7 @@ export default function PortfolioAskPanel() {
   return (
     <Card pad={false}>
       <div className="border-b border-ink-100 px-5 py-4">
-        <CardHeader title="Ask about the portfolio" sub="Natural-language questions across every industry, region and project" right={<MessageSquareText size={15} className="text-accent-600" />} />
+        <CardHeader title="Ask about the portfolio" right={<MessageSquareText size={15} className="text-accent-600" />} />
       </div>
       <div ref={threadRef} className="max-h-[420px] space-y-4 overflow-y-auto px-5 py-4">
         {thread.map((m, i) =>

@@ -60,7 +60,7 @@ const defaultReply: PortfolioChatReply = {
   keywords: [],
   text: () => {
     const all = aggregateKPIs(portfolioProjects);
-    return `Across the portfolio: €${all.totalRevenueM}m revenue, €${all.totalEbitdaM}m EBITDA, ${all.installedCapacityMW.toLocaleString()} MW installed, ${all.activeProjects} active projects. I don't have a scripted answer for that exact question in this demo — try one of the suggested prompts for a fuller answer.`;
+    return `Across the portfolio: €${all.totalRevenueM}m revenue, €${all.totalEbitdaM}m EBITDA, ${all.installedCapacityMW.toLocaleString()} MW installed across ${all.activeProjects} active projects. Ask about a specific industry, region or project and I'll break it down with the figures behind it.`;
   },
 };
 

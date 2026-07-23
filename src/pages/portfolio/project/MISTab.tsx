@@ -24,7 +24,7 @@ export default function MISTab({ project: proj }: { project: PortfolioProject })
           {compareVersions && <MISVersionCompare older={compareVersions.older} newer={compareVersions.newer} />}
 
           <Card>
-            <CardHeader title="MIS Intelligence" sub="Automatically surfaced from reporting history" />
+            <CardHeader title="MIS Intelligence" />
             {movements.length === 0 && repeatedIssues.length === 0 ? (
               <p className="text-[12.5px] text-ink-400">No significant movements or repeated issues detected.</p>
             ) : (
@@ -45,7 +45,7 @@ export default function MISTab({ project: proj }: { project: PortfolioProject })
 
         <div className="space-y-4">
           <Card>
-            <CardHeader title="MIS Timeline" sub="Submission history" />
+            <CardHeader title="MIS Timeline" />
             <div className="h-[280px]">
               <TimelineWidget projectId={proj.id} filterKind="mis-upload" />
             </div>
